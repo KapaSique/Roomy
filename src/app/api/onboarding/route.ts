@@ -15,7 +15,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { profile, survey } = await request.json()
+    let { profile, survey } = await request.json()
+
+    // Convert moveInDate to string for SQLite
+    if (profile?.moveInDate) {
+      profile = {
+        ...profile,
+        moveInDate: new Date(profile.moveInDate).toISOString(),
+      }
+    }
 
     // Update or create profile
     await prisma.profile.upsert({

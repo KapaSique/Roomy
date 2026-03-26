@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -12,6 +12,15 @@ export default function SignInPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [csrfToken, setCsrfToken] = useState('')
+
+  useEffect(() => {
+    // Get CSRF token on mount
+    fetch('/api/auth/csrf')
+      .then(res => res.json())
+      .then(data => setCsrfToken(data.csrfToken))
+      .catch(console.error)
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -19,19 +28,29 @@ export default function SignInPage() {
     setLoading(true)
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      // Use form POST instead of signIn() to properly handle CSRF
+      const formData = new FormData()
+      formData.append('email', email)
+      formData.append('password', password)
+      if (csrfToken) formData.append('csrfToken', csrfToken)
+
+      const response = await fetch('/api/auth/callback/credentials', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(formData as any),
+        redirect: 'manual',
       })
 
-      if (result?.error) {
-        setError('Неверный email или пароль')
-      } else {
+      if (response.status === 302 || response.status === 200) {
         router.push('/search')
         router.refresh()
+      } else {
+        setError('Неверный email или пароль')
       }
     } catch (err) {
+      console.error('Sign in exception:', err)
       setError('Что-то пошло не так')
     } finally {
       setLoading(false)
@@ -114,7 +133,7 @@ export default function SignInPage() {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-foreground/50">
-            Демо email: aleksandr.ivanov@example.com<br/>
+            Демо email: александр.иванов@example.com<br/>
             Пароль: password123
           </p>
         </div>
