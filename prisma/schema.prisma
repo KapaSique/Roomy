@@ -1,0 +1,124 @@
+// This is your Prisma schema for Roomy
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============== MODELS ==============
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  telegramId    String?   @unique
+  name          String
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+  survey        Survey?
+
+  matches1      Match[]   @relation("User1")
+  matches2      Match[]   @relation("User2")
+
+  chats1        Chat[]    @relation("User1")
+  chats2        Chat[]    @relation("User2")
+  messages      Message[]
+
+  @@index([email])
+  @@index([telegramId])
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  city        String?
+  budgetMin   Int?
+  budgetMax   Int?
+  moveInDate  DateTime?
+  bio         String?
+  gender      String?
+  age         Int?
+
+  @@index([userId])
+  @@index([city])
+}
+
+model Survey {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sleepSchedule   String?  // EARLY_BIRD, NORMAL, NIGHT_OWL
+  smoking         String?  // NEVER, OCCASIONALLY, REGULARLY
+  alcohol         String?  // NEVER, OCCASIONALLY, REGULARLY
+  cleanliness     String?  // VERY_CLEAN, CLEAN, MESSY, VERY_MESSY
+  noiseLevel      String?  // QUIET, MODERATE, LOUD
+  guests          String?  // RARELY, OCCASIONALLY, FREQUENTLY
+  parties         String?  // NEVER, RARELY, OCCASIONALLY, FREQUENTLY
+  pets            String?  // NONE, HAVE_CAT, HAVE_DOG, HAVE_OTHER, ALLERGIC
+  workFromHome    String?  // NEVER, OCCASIONALLY, FREQUENTLY, ALWAYS
+  cooking         String?  // NEVER, OCCASIONALLY, FREQUENTLY, ALWAYS
+  sharedSpaces    String?  // PRIVATE, BALANCED, SHARED
+  wakeTime        String?  // VERY_EARLY, EARLY, NORMAL, LATE
+
+  @@index([userId])
+}
+
+model Match {
+  id                  String   @id @default(cuid())
+  user1Id             String
+  user2Id             String
+  user1               User       @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2               User       @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  score               Int
+  dealbreakerConflict Boolean    @default(false)
+  dealbreakerReason   String?
+  calculatedAt        DateTime   @default(now())
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+  @@index([score])
+}
+
+model Chat {
+  id          String     @id @default(cuid())
+  user1Id     String
+  user2Id     String
+  user1       User       @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2       User       @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  messages    Message[]
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  chatId      String
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  content     String
+  createdAt   DateTime @default(now())
+
+  @@index([chatId])
+  @@index([senderId])
+}
