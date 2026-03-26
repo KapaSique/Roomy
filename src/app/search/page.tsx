@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type Match = {
   user: {
@@ -19,6 +19,49 @@ type Match = {
   score: number
   dealbreakerConflict: boolean
   dealbreakerReason?: string
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+    scale: 0.95,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+      damping: 20,
+      mass: 1,
+      duration: 0.5,
+    },
+  },
+}
+
+const fadeInVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
 }
 
 export default function SearchPage() {
@@ -55,10 +98,26 @@ export default function SearchPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground/60">Поиск совпадений...</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="rounded-full h-12 w-12 border-b-2 border-primary mx-auto"
+          />
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-4 text-foreground/60"
+          >
+            Поиск совпадений...
+          </motion.p>
+        </motion.div>
       </div>
     )
   }
@@ -66,7 +125,12 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
       {/* Header */}
-      <header className="bg-card border-b shadow-sm sticky top-0 z-10">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="bg-card border-b shadow-sm sticky top-0 z-10"
+      >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-display font-semibold text-primary">
             Roomy
@@ -86,20 +150,23 @@ export default function SearchPage() {
             </Link>
           </nav>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="flex items-center justify-between mb-6"
         >
           <h1 className="text-3xl font-display font-semibold text-foreground">
             Ваши совпадения ({filteredMatches.length})
           </h1>
-          <div className="flex gap-2">
-            <button
+          <motion.div className="flex gap-2" layout>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg transition-all ${
                 filter === 'all'
@@ -108,8 +175,10 @@ export default function SearchPage() {
               }`}
             >
               Все
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setFilter('no-dealbreaker')}
               className={`px-4 py-2 rounded-lg transition-all ${
                 filter === 'no-dealbreaker'
@@ -118,111 +187,154 @@ export default function SearchPage() {
               }`}
             >
               Без конфликтов
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </motion.div>
 
-        {filteredMatches.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <p className="text-foreground/60">Совпадений не найдено</p>
-          </motion.div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredMatches.map((match, index) => (
-              <motion.div
-                key={match.user.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="bg-card rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all"
-              >
-                <div className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <img
-                      src={match.user.avatarUrl || '/default-avatar.png'}
-                      alt={match.user.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {match.user.name}
-                      </h3>
-                      <p className="text-sm text-foreground/60">
-                        {match.user.profile?.city || 'Город не указан'}
-                        {match.user.profile?.age && `, ${match.user.profile.age}`}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-foreground/70">
-                        Совместимость
-                      </span>
-                      <span
-                        className={`text-lg font-bold ${
-                          match.dealbreakerConflict
-                            ? 'text-destructive'
-                            : match.score >= 70
-                            ? 'text-green-600'
-                            : match.score >= 40
-                            ? 'text-yellow-600'
-                            : 'text-destructive'
-                        }`}
+        <AnimatePresence mode="wait">
+          {filteredMatches.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="text-center py-12"
+            >
+              <p className="text-foreground/60">Совпадений не найдено</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filteredMatches.map((match) => (
+                <motion.div
+                  key={match.user.id}
+                  variants={itemVariants}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="bg-card rounded-2xl shadow-md overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
                       >
-                        {match.dealbreakerConflict ? 'Конфликт' : `${match.score}%`}
-                      </span>
+                        <img
+                          src={match.user.avatarUrl || '/default-avatar.png'}
+                          alt={match.user.name}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      </motion.div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {match.user.name}
+                        </h3>
+                        <p className="text-sm text-foreground/60">
+                          {match.user.profile?.city || 'Город не указан'}
+                          {match.user.profile?.age && `, ${match.user.profile.age}`}
+                        </p>
+                      </div>
                     </div>
-                    <div className="w-full bg-secondary rounded-full h-3">
-                      <div
-                        className={`h-3 rounded-full transition-all ${
-                          match.dealbreakerConflict
-                            ? 'bg-destructive w-full'
-                            : match.score >= 70
-                            ? 'bg-green-600'
-                            : match.score >= 40
-                            ? 'bg-yellow-600'
-                            : 'bg-destructive'
-                        }`}
-                        style={{ width: match.dealbreakerConflict ? '100%' : `${match.score}%` }}
-                      />
-                    </div>
-                    {match.dealbreakerReason && (
-                      <p className="text-xs text-destructive mt-2">
-                        ⚠️ {match.dealbreakerReason}
-                      </p>
+
+                    <motion.div className="mb-4" layout>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-foreground/70">
+                          Совместимость
+                        </span>
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={match.dealbreakerConflict ? 'conflict' : match.score}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.2 }}
+                            className={`text-lg font-bold ${
+                              match.dealbreakerConflict
+                                ? 'text-destructive'
+                                : match.score >= 70
+                                ? 'text-green-600'
+                                : match.score >= 40
+                                ? 'text-yellow-600'
+                                : 'text-destructive'
+                            }`}
+                          >
+                            {match.dealbreakerConflict ? 'Конфликт' : `${match.score}%`}
+                          </motion.span>
+                        </AnimatePresence>
+                      </div>
+                      <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{
+                            width: match.dealbreakerConflict ? '100%' : `${match.score}%`,
+                          }}
+                          transition={{
+                            duration: 1,
+                            delay: 0.2,
+                            ease: [0.25, 0.46, 0.45, 0.94],
+                          }}
+                          className={`h-3 rounded-full ${
+                            match.dealbreakerConflict
+                              ? 'bg-destructive'
+                              : match.score >= 70
+                              ? 'bg-green-600'
+                              : match.score >= 40
+                              ? 'bg-yellow-600'
+                              : 'bg-destructive'
+                          }`}
+                        />
+                      </div>
+                      {match.dealbreakerReason && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          transition={{ delay: 0.3 }}
+                          className="text-xs text-destructive mt-2"
+                        >
+                          ⚠️ {match.dealbreakerReason}
+                        </motion.p>
+                      )}
+                    </motion.div>
+
+                    {match.user.profile?.bio && (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-sm text-foreground/60 mb-4 line-clamp-2"
+                      >
+                        {match.user.profile.bio}
+                      </motion.p>
                     )}
-                  </div>
 
-                  {match.user.profile?.bio && (
-                    <p className="text-sm text-foreground/60 mb-4 line-clamp-2">
-                      {match.user.profile.bio}
-                    </p>
-                  )}
-
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/profile/${match.user.id}`}
-                      className="flex-1 px-4 py-2 bg-secondary text-foreground rounded-lg text-center hover:bg-secondary/80 text-sm transition-colors"
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="flex gap-2"
                     >
-                      Профиль
-                    </Link>
-                    <Link
-                      href={`/chats?userId=${match.user.id}`}
-                      className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-center hover:bg-primary/90 text-sm transition-colors"
-                    >
-                      Написать
-                    </Link>
+                      <Link
+                        href={`/profile/${match.user.id}`}
+                        className="flex-1 px-4 py-2 bg-secondary text-foreground rounded-lg text-center hover:bg-secondary/80 text-sm transition-colors"
+                      >
+                        Профиль
+                      </Link>
+                      <Link
+                        href={`/chats?userId=${match.user.id}`}
+                        className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-center hover:bg-primary/90 text-sm transition-colors"
+                      >
+                        Написать
+                      </Link>
+                    </motion.div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   )

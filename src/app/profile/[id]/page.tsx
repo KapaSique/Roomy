@@ -38,7 +38,7 @@ type UserProfile = {
 const formatEnum = (value: string) => {
   const translations: Record<string, string> = {
     EARLY_BIRD: 'Жаворонок',
-    NORMAL: 'Нормальный',
+    NORMAL: 'Обычный режим',
     NIGHT_OWL: 'Сова',
     NEVER: 'Никогда',
     OCCASIONALLY: 'Иногда',
@@ -53,19 +53,42 @@ const formatEnum = (value: string) => {
     RARELY: 'Редко',
     FREQUENTLY: 'Часто',
     NONE: 'Нет питомцев',
-    HAVE_CAT: 'Есть кот',
+    HAVE_CAT: 'Есть кот/кошка',
     HAVE_DOG: 'Есть собака',
     HAVE_OTHER: 'Другие питомцы',
     ALLERGIC: 'Аллергия',
     ALWAYS: 'Всегда',
-    PRIVATE: 'Приватность',
-    BALANCED: 'Баланс',
-    SHARED: 'Общение',
-    VERY_EARLY: 'Очень рано',
-    EARLY: 'Рано',
-    LATE: 'Поздно',
+    PRIVATE: 'Предпочитаю уединение',
+    BALANCED: 'Золотая середина',
+    SHARED: 'Люблю общение',
+    VERY_EARLY: 'Очень рано (5-6 утра)',
+    EARLY: 'Рано (6-8 утра)',
+    LATE: 'Поздно (после 10 утра)',
   }
   return translations[value] || value
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
 }
 
 export default function UserProfilePage() {
@@ -108,7 +131,11 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
+        />
       </div>
     )
   }
@@ -120,7 +147,12 @@ export default function UserProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
       {/* Header */}
-      <header className="bg-card border-b shadow-sm">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="bg-card border-b shadow-sm"
+      >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-display font-semibold text-primary">Roomy</Link>
           <nav className="flex gap-4">
@@ -132,19 +164,22 @@ export default function UserProfilePage() {
             </Link>
           </nav>
         </div>
-      </header>
+      </motion.header>
 
       {/* Profile Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-4xl mx-auto"
+        >
           {/* Profile Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-2xl shadow-md p-8 mb-6"
-          >
+          <motion.div variants={itemVariants} className="bg-card rounded-2xl shadow-md p-8 mb-6">
             <div className="flex items-center gap-6">
-              <img
+              <motion.img
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: 'spring', stiffness: 300 }}
                 src={user.avatarUrl || '/default-avatar.png'}
                 alt={user.name}
                 className="w-24 h-24 rounded-full object-cover"
@@ -157,50 +192,71 @@ export default function UserProfilePage() {
                   {user.profile?.gender && ` • ${user.profile.gender}`}
                 </p>
                 {user.profile?.bio && (
-                  <p className="mt-2 text-foreground/70">{user.profile.bio}</p>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="mt-2 text-foreground/70"
+                  >
+                    {user.profile.bio}
+                  </motion.p>
                 )}
               </div>
             </div>
 
             {!isOwnProfile && (
-              <div className="mt-6">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-6"
+              >
                 <Link
                   href={`/chats?userId=${user.id}`}
                   className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                 >
                   Написать сообщение
                 </Link>
-              </div>
+              </motion.div>
             )}
           </motion.div>
 
           {/* Housing Info */}
           {user.profile && (user.profile.budgetMin || user.profile.budgetMax || user.profile.moveInDate) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-card rounded-2xl shadow-md p-6 mb-6"
-            >
-              <h2 className="text-xl font-display font-semibold text-foreground mb-4">Предпочтения по жилью</h2>
+            <motion.div variants={itemVariants} className="bg-card rounded-2xl shadow-md p-6 mb-6">
+              <h2 className="text-xl font-display font-semibold text-foreground mb-4">
+                Предпочтения по жилью
+              </h2>
               <div className="grid md:grid-cols-3 gap-4">
                 {(user.profile.budgetMin || user.profile.budgetMax) && (
-                  <div>
-                    <p className="text-sm text-foreground/60">Бюджет</p>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <p className="text-sm text-foreground/60">Бюджет в месяц</p>
                     <p className="text-foreground">
                       {user.profile.budgetMin && `${user.profile.budgetMin.toLocaleString()}₽`}
                       {' — '}
                       {user.profile.budgetMax && `${user.profile.budgetMax.toLocaleString()}₽`}
                     </p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.profile.moveInDate && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
                     <p className="text-sm text-foreground/60">Дата заезда</p>
                     <p className="text-foreground">
-                      {new Date(user.profile.moveInDate).toLocaleDateString('ru-RU')}
+                      {new Date(user.profile.moveInDate).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
                     </p>
-                  </div>
+                  </motion.div>
                 )}
               </div>
             </motion.div>
@@ -208,90 +264,135 @@ export default function UserProfilePage() {
 
           {/* Survey/Habits */}
           {user.survey && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-card rounded-2xl shadow-md p-6"
-            >
-              <h2 className="text-xl font-display font-semibold text-foreground mb-4">Привычки и образ жизни</h2>
+            <motion.div variants={itemVariants} className="bg-card rounded-2xl shadow-md p-6">
+              <h2 className="text-xl font-display font-semibold text-foreground mb-4">
+                Привычки и образ жизни
+              </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {user.survey.sleepSchedule && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                  >
                     <p className="text-sm text-foreground/60">Режим сна</p>
                     <p className="text-foreground">{formatEnum(user.survey.sleepSchedule)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.smoking && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.15 }}
+                  >
                     <p className="text-sm text-foreground/60">Курение</p>
                     <p className="text-foreground">{formatEnum(user.survey.smoking)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.alcohol && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
                     <p className="text-sm text-foreground/60">Алкоголь</p>
                     <p className="text-foreground">{formatEnum(user.survey.alcohol)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.cleanliness && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.25 }}
+                  >
                     <p className="text-sm text-foreground/60">Чистоплотность</p>
                     <p className="text-foreground">{formatEnum(user.survey.cleanliness)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.noiseLevel && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
                     <p className="text-sm text-foreground/60">Уровень шума</p>
                     <p className="text-foreground">{formatEnum(user.survey.noiseLevel)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.guests && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.35 }}
+                  >
                     <p className="text-sm text-foreground/60">Гости</p>
                     <p className="text-foreground">{formatEnum(user.survey.guests)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.parties && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
                     <p className="text-sm text-foreground/60">Вечеринки</p>
                     <p className="text-foreground">{formatEnum(user.survey.parties)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.pets && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.45 }}
+                  >
                     <p className="text-sm text-foreground/60">Питомцы</p>
                     <p className="text-foreground">{formatEnum(user.survey.pets)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.workFromHome && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
                     <p className="text-sm text-foreground/60">Работа из дома</p>
                     <p className="text-foreground">{formatEnum(user.survey.workFromHome)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.cooking && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.55 }}
+                  >
                     <p className="text-sm text-foreground/60">Готовка</p>
                     <p className="text-foreground">{formatEnum(user.survey.cooking)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.sharedSpaces && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
                     <p className="text-sm text-foreground/60">Общие пространства</p>
                     <p className="text-foreground">{formatEnum(user.survey.sharedSpaces)}</p>
-                  </div>
+                  </motion.div>
                 )}
                 {user.survey.wakeTime && (
-                  <div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.65 }}
+                  >
                     <p className="text-sm text-foreground/60">Время подъёма</p>
                     <p className="text-foreground">{formatEnum(user.survey.wakeTime)}</p>
-                  </div>
+                  </motion.div>
                 )}
               </div>
             </motion.div>
           )}
-        </div>
+        </motion.div>
       </main>
     </div>
   )

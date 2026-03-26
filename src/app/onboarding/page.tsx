@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const STEPS = [
   { id: 'basic', title: 'Основное' },
@@ -14,83 +14,106 @@ const STEPS = [
 ]
 
 const SLEEP_SCHEDULES = [
-  { value: 'EARLY_BIRD', label: 'Жаворонок (до 7 утра)' },
-  { value: 'NORMAL', label: 'Нормальный (7-9 утра)' },
-  { value: 'NIGHT_OWL', label: 'Сова (после 9 утра)' },
+  { value: 'EARLY_BIRD', label: 'Жаворонок (встаю до 7 утра)' },
+  { value: 'NORMAL', label: 'Обычный режим (7-9 утра)' },
+  { value: 'NIGHT_OWL', label: 'Сова (встаю после 9 утра)' },
 ]
 
 const SMOKING_OPTIONS = [
   { value: 'NEVER', label: 'Не курю' },
-  { value: 'OCCASIONALLY', label: 'Иногда' },
+  { value: 'OCCASIONALLY', label: 'Иногда курю' },
   { value: 'REGULARLY', label: 'Курю регулярно' },
 ]
 
 const ALCOHOL_OPTIONS = [
-  { value: 'NEVER', label: 'Не пью' },
-  { value: 'OCCASIONALLY', label: 'Иногда' },
-  { value: 'REGULARLY', label: 'Регулярно' },
+  { value: 'NEVER', label: 'Не употребляю' },
+  { value: 'OCCASIONALLY', label: 'Иногда употребляю' },
+  { value: 'REGULARLY', label: 'Употребляю регулярно' },
 ]
 
 const CLEANLINESS_OPTIONS = [
-  { value: 'VERY_CLEAN', label: 'Очень чисто' },
-  { value: 'CLEAN', label: 'Чисто' },
-  { value: 'MESSY', label: 'Небрежно' },
-  { value: 'VERY_MESSY', label: 'Очень небрежно' },
+  { value: 'VERY_CLEAN', label: 'Очень чистоплотный(ая)' },
+  { value: 'CLEAN', label: 'Чистоплотный(ая)' },
+  { value: 'MESSY', label: 'Не очень аккуратный(ая)' },
+  { value: 'VERY_MESSY', label: 'Очень неаккуратный(ая)' },
 ]
 
 const NOISE_OPTIONS = [
-  { value: 'QUIET', label: 'Тихо' },
-  { value: 'MODERATE', label: 'Умеренно' },
-  { value: 'LOUD', label: 'Шумно' },
+  { value: 'QUIET', label: 'Предпочитаю тишину' },
+  { value: 'MODERATE', label: 'Умеренный уровень шума' },
+  { value: 'LOUD', label: 'Люблю когда шумно' },
 ]
 
 const GUESTS_OPTIONS = [
-  { value: 'RARELY', label: 'Редко' },
-  { value: 'OCCASIONALLY', label: 'Иногда' },
-  { value: 'FREQUENTLY', label: 'Часто' },
+  { value: 'RARELY', label: 'Редко принимаю гостей' },
+  { value: 'OCCASIONALLY', label: 'Иногда принимаю гостей' },
+  { value: 'FREQUENTLY', label: 'Часто принимаю гостей' },
 ]
 
 const PARTIES_OPTIONS = [
-  { value: 'NEVER', label: 'Никогда' },
-  { value: 'RARELY', label: 'Редко' },
-  { value: 'OCCASIONALLY', label: 'Иногда' },
-  { value: 'FREQUENTLY', label: 'Часто' },
+  { value: 'NEVER', label: 'Не устраиваю вечеринки' },
+  { value: 'RARELY', label: 'Редко устраиваю вечеринки' },
+  { value: 'OCCASIONALLY', label: 'Иногда устраиваю вечеринки' },
+  { value: 'FREQUENTLY', label: 'Часто устраиваю вечеринки' },
 ]
 
 const PETS_OPTIONS = [
-  { value: 'NONE', label: 'Без питомцев' },
-  { value: 'HAVE_CAT', label: 'Есть кот' },
+  { value: 'NONE', label: 'Без домашних животных' },
+  { value: 'HAVE_CAT', label: 'Есть кот/кошка' },
   { value: 'HAVE_DOG', label: 'Есть собака' },
-  { value: 'HAVE_OTHER', label: 'Другие питомцы' },
-  { value: 'ALLERGIC', label: 'Аллергия на питомцев' },
+  { value: 'HAVE_OTHER', label: 'Есть другие питомцы' },
+  { value: 'ALLERGIC', label: 'Аллергия на животных' },
 ]
 
 const WORK_FROM_HOME_OPTIONS = [
-  { value: 'NEVER', label: 'Никогда' },
-  { value: 'OCCASIONALLY', label: 'Иногда' },
-  { value: 'FREQUENTLY', label: 'Часто' },
-  { value: 'ALWAYS', label: 'Всегда' },
+  { value: 'NEVER', label: 'Никогда не работаю из дома' },
+  { value: 'OCCASIONALLY', label: 'Иногда работаю из дома' },
+  { value: 'FREQUENTLY', label: 'Часто работаю из дома' },
+  { value: 'ALWAYS', label: 'Всегда работаю из дома' },
 ]
 
 const COOKING_OPTIONS = [
-  { value: 'NEVER', label: 'Никогда' },
-  { value: 'OCCASIONALLY', label: 'Иногда' },
-  { value: 'FREQUENTLY', label: 'Часто' },
-  { value: 'ALWAYS', label: 'Всегда' },
+  { value: 'NEVER', label: 'Никогда не готовлю' },
+  { value: 'OCCASIONALLY', label: 'Иногда готовлю' },
+  { value: 'FREQUENTLY', label: 'Часто готовлю' },
+  { value: 'ALWAYS', label: 'Всегда готовлю' },
 ]
 
 const SHARED_SPACES_OPTIONS = [
-  { value: 'PRIVATE', label: 'Предпочитаю приватность' },
-  { value: 'BALANCED', label: 'Баланс' },
-  { value: 'SHARED', label: 'Люблю общение' },
+  { value: 'PRIVATE', label: 'Предпочитаю уединение' },
+  { value: 'BALANCED', label: 'Золотая середина' },
+  { value: 'SHARED', label: 'Люблю проводить время вместе' },
 ]
 
 const WAKE_TIME_OPTIONS = [
   { value: 'VERY_EARLY', label: 'Очень рано (5-6 утра)' },
   { value: 'EARLY', label: 'Рано (6-8 утра)' },
-  { value: 'NORMAL', label: 'Нормально (8-10 утра)' },
+  { value: 'NORMAL', label: 'Обычно (8-10 утра)' },
   { value: 'LATE', label: 'Поздно (после 10 утра)' },
 ]
+
+const stepVariants = {
+  hidden: { opacity: 0, x: 30 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.4,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      staggerChildren: 0.1,
+    },
+  },
+  exit: { opacity: 0, x: -30, transition: { duration: 0.3 } },
+}
+
+const fieldVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3 },
+  },
+}
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -177,9 +200,11 @@ export default function OnboardingPage() {
     switch (currentStep) {
       case 0: // Basic Info
         return (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-display font-semibold text-foreground">Основная информация</h2>
-            <div>
+          <motion.div variants={stepVariants} className="space-y-4">
+            <motion.h2 variants={fieldVariants} className="text-2xl font-display font-semibold text-foreground">
+              Основная информация
+            </motion.h2>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Возраст</label>
               <input
                 type="number"
@@ -188,8 +213,8 @@ export default function OnboardingPage() {
                 className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                 placeholder="25"
               />
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Пол</label>
               <select
                 value={formData.gender}
@@ -202,15 +227,17 @@ export default function OnboardingPage() {
                 <option value="Non-binary">Небинарный</option>
                 <option value="Other">Другой</option>
               </select>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )
 
       case 1: // Housing
         return (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-display font-semibold text-foreground">Предпочтения по жилью</h2>
-            <div>
+          <motion.div variants={stepVariants} className="space-y-4">
+            <motion.h2 variants={fieldVariants} className="text-2xl font-display font-semibold text-foreground">
+              Предпочтения по жилью
+            </motion.h2>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Город</label>
               <input
                 type="text"
@@ -219,8 +246,8 @@ export default function OnboardingPage() {
                 className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                 placeholder="Москва"
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            </motion.div>
+            <motion.div variants={fieldVariants} className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground/80">Мин. бюджет (₽)</label>
                 <input
@@ -241,8 +268,8 @@ export default function OnboardingPage() {
                   placeholder="60000"
                 />
               </div>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Дата заезда</label>
               <input
                 type="date"
@@ -250,15 +277,17 @@ export default function OnboardingPage() {
                 onChange={(e) => updateField('moveInDate', e.target.value)}
                 className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )
 
       case 2: // Habits
         return (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-display font-semibold text-foreground">Привычки и образ жизни</h2>
-            <div>
+          <motion.div variants={stepVariants} className="space-y-4">
+            <motion.h2 variants={fieldVariants} className="text-2xl font-display font-semibold text-foreground">
+              Привычки и образ жизни
+            </motion.h2>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Режим сна</label>
               <select
                 value={formData.sleepSchedule}
@@ -270,8 +299,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Курение</label>
               <select
                 value={formData.smoking}
@@ -283,8 +312,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Алкоголь</label>
               <select
                 value={formData.alcohol}
@@ -296,8 +325,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Чистоплотность</label>
               <select
                 value={formData.cleanliness}
@@ -309,15 +338,17 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )
 
       case 3: // Social
         return (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-display font-semibold text-foreground">Социальные предпочтения</h2>
-            <div>
+          <motion.div variants={stepVariants} className="space-y-4">
+            <motion.h2 variants={fieldVariants} className="text-2xl font-display font-semibold text-foreground">
+              Социальные предпочтения
+            </motion.h2>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Уровень шума</label>
               <select
                 value={formData.noiseLevel}
@@ -329,8 +360,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Гости</label>
               <select
                 value={formData.guests}
@@ -342,8 +373,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Вечеринки</label>
               <select
                 value={formData.parties}
@@ -355,8 +386,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Питомцы</label>
               <select
                 value={formData.pets}
@@ -368,15 +399,17 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )
 
       case 4: // Bio
         return (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-display font-semibold text-foreground">Ещё о вас</h2>
-            <div>
+          <motion.div variants={stepVariants} className="space-y-4">
+            <motion.h2 variants={fieldVariants} className="text-2xl font-display font-semibold text-foreground">
+              Ещё о вас
+            </motion.h2>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Работа из дома</label>
               <select
                 value={formData.workFromHome}
@@ -388,8 +421,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Готовка</label>
               <select
                 value={formData.cooking}
@@ -401,8 +434,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Общие пространства</label>
               <select
                 value={formData.sharedSpaces}
@@ -414,8 +447,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">Время подъёма</label>
               <select
                 value={formData.wakeTime}
@@ -427,8 +460,8 @@ export default function OnboardingPage() {
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">О себе</label>
               <textarea
                 value={formData.bio}
@@ -437,8 +470,8 @@ export default function OnboardingPage() {
                 className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                 placeholder="Расскажите потенциальным соседям о себе..."
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )
 
       default:
@@ -456,54 +489,69 @@ export default function OnboardingPage() {
         >
           <div className="flex justify-between mb-2">
             {STEPS.map((step, index) => (
-              <div
+              <motion.div
                 key={step.id}
                 className={`flex-1 h-2 mx-1 rounded transition-all ${
                   index <= currentStep ? 'bg-primary' : 'bg-secondary'
                 }`}
+                layout
               />
             ))}
           </div>
-          <p className="text-sm text-foreground/60 text-center">
+          <p className="text-sm text-foreground/60 text-center mt-2">
             Шаг {currentStep + 1} из {STEPS.length}: {STEPS[currentStep].title}
           </p>
         </motion.div>
 
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {renderStep()}
-        </motion.div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            variants={stepVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            {renderStep()}
+          </motion.div>
+        </AnimatePresence>
 
-        <div className="flex justify-between mt-8">
-          <button
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex justify-between mt-8"
+        >
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={prevStep}
             disabled={currentStep === 0}
             className="px-6 py-3 border border-border rounded-lg text-foreground hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             Назад
-          </button>
+          </motion.button>
 
           {currentStep === STEPS.length - 1 ? (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
               disabled={loading}
               className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-all"
             >
               {loading ? 'Сохранение...' : 'Готово'}
-            </button>
+            </motion.button>
           ) : (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={nextStep}
               className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all"
             >
               Далее
-            </button>
+            </motion.button>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   )
