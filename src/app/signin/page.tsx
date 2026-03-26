@@ -133,7 +133,7 @@ export default function SignInPage() {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-foreground/50">
-            Демо email: александр.иванов@example.com<br/>
+            Демо: aleksandr.ivanov@example.com<br/>
             Пароль: password123
           </p>
         </div>

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+// Russian names for display
 const firstNames = [
   'Александр', 'Михаил', 'Дмитрий', 'Алексей', 'Иван',
   'Андрей', 'Сергей', 'Артем', 'Павел', 'Максим',
@@ -17,6 +18,23 @@ const lastNames = [
   'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Семёнов',
   'Егоров', 'Павлов', 'Козлов', 'Степанов', 'Николаев',
   'Орлов', 'Андреев', 'Макаров', 'Никитин', 'Захаров'
+]
+
+// Latin transliteration for emails
+const firstNamesLatin = [
+  'aleksandr', 'mikhail', 'dmitry', 'aleksey', 'ivan',
+  'andrey', 'sergey', 'artem', 'pavel', 'maksim',
+  'elena', 'olga', 'natalya', 'anna', 'maria',
+  'tatyana', 'svetlana', 'irina', 'ekaterina', 'yulia',
+  'anastasia', 'viktoriya', 'darya', 'polina', 'ksenia'
+]
+
+const lastNamesLatin = [
+  'ivanov', 'smirnov', 'kuznetsov', 'popov', 'vasilyev',
+  'petrov', 'sokolov', 'mikhailov', 'novikov', 'fedorov',
+  'morozov', 'volkov', 'alekseev', 'lebedev', 'semenov',
+  'egorov', 'pavlov', 'kozlov', 'stepanov', 'nikolaev',
+  'orlov', 'andreev', 'makarov', 'nikitin', 'zakharov'
 ]
 
 const cities = ['Москва', 'Санкт-Петербург', 'Якутск', 'Казань', 'Новосибирск']
@@ -82,7 +100,11 @@ async function main() {
   for (let i = 0; i < 25; i++) {
     const firstName = firstNames[i]
     const lastName = lastNames[i]
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`
+    const firstNameLatin = firstNamesLatin[i]
+    const lastNameLatin = lastNamesLatin[i]
+
+    // Email on latin characters
+    const email = `${firstNameLatin}.${lastNameLatin}@example.com`
     const password = await bcrypt.hash('password123', 10)
 
     const user = await prisma.user.create({
@@ -126,11 +148,12 @@ async function main() {
     })
 
     users.push(user)
-    console.log(`Created user: ${user.name}`)
+    console.log(`Created user: ${user.name} (${user.email})`)
   }
 
   console.log(`\nSeeded ${users.length} users successfully!`)
   console.log('\nAll users have password: password123')
+  console.log('\nFirst user email: aleksandr.ivanov@example.com')
 }
 
 main()
