@@ -235,6 +235,7 @@ export default function SearchPage() {
                         <p className="text-sm text-foreground/60">
                           {match.user.profile?.city || 'Город не указан'}
                           {match.user.profile?.age && `, ${match.user.profile.age}`}
+                          {match.user.profile?.gender && ` • ${match.user.profile.gender === 'Male' ? 'Муж.' : 'Жен.'}`}
                         </p>
                       </div>
                     </div>

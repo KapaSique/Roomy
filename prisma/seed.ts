@@ -4,49 +4,49 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 const firstNames = [
-  'Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey',
-  'Riley', 'Avery', 'Quinn', 'Peyton', 'Skyler',
-  'Dakota', 'Reese', 'Hayden', 'Emerson', 'Finley',
-  'Rowan', 'Sage', 'Phoenix', 'River', 'Blake',
-  'Charlie', 'Jamie', 'Robin', 'Cameron', 'Drew'
+  'Александр', 'Михаил', 'Дмитрий', 'Алексей', 'Иван',
+  'Андрей', 'Сергей', 'Артем', 'Павел', 'Максим',
+  'Елена', 'Ольга', 'Наталья', 'Анна', 'Мария',
+  'Татьяна', 'Светлана', 'Ирина', 'Екатерина', 'Юлия',
+  'Анастасия', 'Виктория', 'Дарья', 'Полина', 'Ксения'
 ]
 
 const lastNames = [
-  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones',
-  'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
-  'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson',
-  'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
-  'Lee', 'Perez', 'Thompson', 'White', 'Harris'
+  'Иванов', 'Смирнов', 'Кузнецов', 'Попов', 'Васильев',
+  'Петров', 'Соколов', 'Михайлов', 'Новиков', 'Фёдоров',
+  'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Семёнов',
+  'Егоров', 'Павлов', 'Козлов', 'Степанов', 'Николаев',
+  'Орлов', 'Андреев', 'Макаров', 'Никитин', 'Захаров'
 ]
 
-const cities = ['Moscow', 'Saint Petersburg', 'Kazan', 'Novosibirsk', 'Yekaterinburg']
+const cities = ['Москва', 'Санкт-Петербург', 'Якутск', 'Казань', 'Новосибирск']
 
 const bios = [
-  'Love coding and coffee. Looking for a quiet roommate.',
-  'Software developer, enjoy gaming and movies.',
-  'Student, need a peaceful place to study.',
-  'Designer, work from home mostly. Very clean.',
-  'Entrepreneur, often travel for work.',
-  'Musician, sometimes practice at home.',
-  'Writer, need quiet evenings.',
-  'Developer, night owl, very respectful.',
-  'Artist, creative and tidy.',
-  'Engineer, regular schedule, love cooking.',
-  'Marketing specialist, social but respectful.',
-  'Data scientist, work remotely, quiet person.',
-  'Product manager, often have calls from home.',
-  'Freelancer, flexible schedule, easy going.',
-  'Consultant, travel frequently.',
-  'Teacher, early bird, love morning routines.',
-  'Researcher, need quiet for deep work.',
-  'Architect, creative schedule, very organized.',
-  'Photographer, work on projects, often out.',
-  'Chef, love cooking experiments.',
-  'Fitness trainer, early mornings, healthy lifestyle.',
-  'Nurse, shift work, quiet during sleep hours.',
-  'Lawyer, work from office mostly, neat.',
-  'Accountant, organized and clean.',
-  'Developer, startup founder, busy but respectful.'
+  'Люблю код и кофе. Ищу спокойного соседа.',
+  'Разработчик, увлекаюсь играми и фильмами.',
+  'Студент, нужно спокойное место для учёбы.',
+  'Дизайнер, работаю из дома. Очень чистоплотный.',
+  'Предприниматель, часто в командировках.',
+  'Музыкант, иногда репетирую дома.',
+  'Писатель, нужны тихие вечера.',
+  'Разработчик, сова, очень уважительный.',
+  'Художник, творческий и аккуратный.',
+  'Инженер, регулярный график, люблю готовить.',
+  'Маркетолог, общительный, но уважительный.',
+  'Дата-сайентист, работаю удалённо, тихий.',
+  'Продакт-менеджер, часто созвоны из дома.',
+  'Фрилансер, гибкий график, лёгкий в общении.',
+  'Консультант, часто в разъездах.',
+  'Учитель, жаворонок, люблю утренние ритуалы.',
+  'Исследователь, нужна тишина для работы.',
+  'Архитектор, творческий график, очень организованный.',
+  'Фотограф, работаю над проектами, часто отсутствую.',
+  'Шеф-повар, люблю кулинарные эксперименты.',
+  'Фитнес-тренер, ранние подъёмы, здоровый образ жизни.',
+  'Медбрат/медсестра, сменная работа, тишина во время сна.',
+  'Юрист, работаю в офисе, аккуратный.',
+  'Бухгалтер, организованный и чистоплотный.',
+  'Разработчик, основатель стартапа, занят, но уважителен.'
 ]
 
 const sleepSchedules = ['EARLY_BIRD', 'NORMAL', 'NIGHT_OWL'] as const
@@ -98,7 +98,7 @@ async function main() {
             budgetMax: 50000 + Math.floor(Math.random() * 50000),
             moveInDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000),
             bio: bios[i],
-            gender: pickRandom(['Male', 'Female', 'Non-binary']),
+            gender: pickRandom(['Male', 'Female']),
             age: 20 + Math.floor(Math.random() * 20),
           },
         },

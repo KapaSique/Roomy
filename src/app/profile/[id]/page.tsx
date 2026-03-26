@@ -43,10 +43,10 @@ const formatEnum = (value: string) => {
     NEVER: 'Никогда',
     OCCASIONALLY: 'Иногда',
     REGULARLY: 'Регулярно',
-    VERY_CLEAN: 'Очень чисто',
-    CLEAN: 'Чисто',
-    MESSY: 'Небрежно',
-    VERY_MESSY: 'Очень небрежно',
+    VERY_CLEAN: 'Стерильная чистота',
+    CLEAN: 'Чисто и аккуратно',
+    MESSY: 'Беспорядочно',
+    VERY_MESSY: 'Полный хаос',
     QUIET: 'Тихо',
     MODERATE: 'Умеренно',
     LOUD: 'Шумно',
@@ -66,6 +66,10 @@ const formatEnum = (value: string) => {
     LATE: 'Поздно (после 10 утра)',
   }
   return translations[value] || value
+}
+
+const formatGender = (value: string) => {
+  return value === 'Male' ? 'Мужской' : 'Женский'
 }
 
 const containerVariants = {
@@ -189,7 +193,7 @@ export default function UserProfilePage() {
                 <p className="text-foreground/60">
                   {user.profile?.city && `${user.profile.city}`}
                   {user.profile?.age && `, ${user.profile.age}`}
-                  {user.profile?.gender && ` • ${user.profile.gender}`}
+                  {user.profile?.gender && ` • ${formatGender(user.profile.gender)}`}
                 </p>
                 {user.profile?.bio && (
                   <motion.p
