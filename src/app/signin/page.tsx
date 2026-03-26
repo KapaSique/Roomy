@@ -114,7 +114,8 @@ export default function SignInPage() {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-foreground/50">
-            Демо: используйте любой email из базы (например, alex.smith@example.com) с паролем: password123
+            Демо email: aleksandr.ivanov@example.com<br/>
+            Пароль: password123
           </p>
         </div>
       </motion.div>
