@@ -13,6 +13,25 @@ const STEPS = [
   { id: 'bio', title: 'О себе' },
 ]
 
+const CITIES = [
+  { value: 'Москва', label: 'Москва', popular: true },
+  { value: 'Санкт-Петербург', label: 'Санкт-Петербург', popular: true },
+  { value: 'Якутск', label: 'Якутск', popular: true },
+  { value: 'Казань', label: 'Казань', popular: true },
+  { value: 'Новосибирск', label: 'Новосибирск', popular: true },
+  { value: 'Екатеринбург', label: 'Екатеринбург', popular: true },
+  { value: 'Нижний Новгород', label: 'Нижний Новгород', popular: false },
+  { value: 'Челябинск', label: 'Челябинск', popular: false },
+  { value: 'Самара', label: 'Самара', popular: false },
+  { value: 'Омск', label: 'Омск', popular: false },
+  { value: 'Ростов-на-Дону', label: 'Ростов-на-Дону', popular: false },
+  { value: 'Уфа', label: 'Уфа', popular: false },
+  { value: 'Красноярск', label: 'Красноярск', popular: false },
+  { value: 'Воронеж', label: 'Воронеж', popular: false },
+  { value: 'Пермь', label: 'Пермь', popular: false },
+  { value: 'Волгоград', label: 'Волгоград', popular: false },
+]
+
 const SLEEP_SCHEDULES = [
   { value: 'EARLY_BIRD', label: 'Жаворонок (встаю до 7 утра)' },
   { value: 'NORMAL', label: 'Обычный режим (7-9 утра)' },
@@ -32,10 +51,10 @@ const ALCOHOL_OPTIONS = [
 ]
 
 const CLEANLINESS_OPTIONS = [
-  { value: 'VERY_CLEAN', label: 'Очень чистоплотный(ая)' },
-  { value: 'CLEAN', label: 'Чистоплотный(ая)' },
-  { value: 'MESSY', label: 'Не очень аккуратный(ая)' },
-  { value: 'VERY_MESSY', label: 'Очень неаккуратный(ая)' },
+  { value: 'VERY_CLEAN', label: 'Стерильная чистота' },
+  { value: 'CLEAN', label: 'Чисто и аккуратно' },
+  { value: 'MESSY', label: 'Беспорядочно' },
+  { value: 'VERY_MESSY', label: 'Полный хаос' },
 ]
 
 const NOISE_OPTIONS = [
@@ -120,11 +139,12 @@ export default function OnboardingPage() {
   const { data: session } = useSession()
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     // Profile
     city: '',
-    budgetMin: '',
-    budgetMax: '',
+    budgetMin: 20000,
+    budgetMax: 60000,
     moveInDate: '',
     gender: '',
     age: '',
@@ -144,14 +164,163 @@ export default function OnboardingPage() {
     bio: '',
   })
 
-  const updateField = (field: string, value: string) => {
+  const updateField = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear error when user starts filling
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
   }
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length - 1))
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0))
+  const nextStep = () => {
+    // Validate current step fields
+    const newErrors: Record<string, string> = {}
+
+    if (currentStep === 0) {
+      if (!formData.age || formData.age < 18 || formData.age > 100) {
+        newErrors.age = 'Укажите возраст от 18 до 100'
+      }
+      if (!formData.gender) {
+        newErrors.gender = 'Выберите пол'
+      }
+    }
+
+    if (currentStep === 1) {
+      if (!formData.city) {
+        newErrors.city = 'Выберите город'
+      }
+      if (formData.budgetMin >= formData.budgetMax) {
+        newErrors.budget = 'Минимальный бюджет должен быть меньше максимального'
+      }
+      if (!formData.moveInDate) {
+        newErrors.moveInDate = 'Укажите дату заезда'
+      }
+    }
+
+    if (currentStep === 2) {
+      if (!formData.sleepSchedule) {
+        newErrors.sleepSchedule = 'Выберите режим сна'
+      }
+      if (!formData.smoking) {
+        newErrors.smoking = 'Выберите отношение к курению'
+      }
+      if (!formData.alcohol) {
+        newErrors.alcohol = 'Выберите отношение к алкоголю'
+      }
+      if (!formData.cleanliness) {
+        newErrors.cleanliness = 'Выберите уровень чистоплотности'
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!formData.noiseLevel) {
+        newErrors.noiseLevel = 'Выберите уровень шума'
+      }
+      if (!formData.guests) {
+        newErrors.guests = 'Выберите частоту приёма гостей'
+      }
+      if (!formData.parties) {
+        newErrors.parties = 'Выберите отношение к вечеринкам'
+      }
+      if (!formData.pets) {
+        newErrors.pets = 'Выберите отношение к питомцам'
+      }
+    }
+
+    if (currentStep === 4) {
+      if (!formData.workFromHome) {
+        newErrors.workFromHome = 'Выберите режим работы'
+      }
+      if (!formData.cooking) {
+        newErrors.cooking = 'Выберите частоту готовки'
+      }
+      if (!formData.sharedSpaces) {
+        newErrors.sharedSpaces = 'Выберите отношение к общим пространствам'
+      }
+      if (!formData.wakeTime) {
+        newErrors.wakeTime = 'Выберите время подъёма'
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    setCurrentStep(prev => Math.min(prev + 1, STEPS.length - 1))
+  }
+
+  const prevStep = () => {
+    setErrors({})
+    setCurrentStep(prev => Math.max(prev - 1, 0))
+  }
 
   const handleSubmit = async () => {
+    // Final validation
+    const newErrors: Record<string, string> = {}
+
+    if (!formData.age || formData.age < 18 || formData.age > 100) {
+      newErrors.age = 'Укажите возраст от 18 до 100'
+    }
+    if (!formData.gender) {
+      newErrors.gender = 'Выберите пол'
+    }
+    if (!formData.city) {
+      newErrors.city = 'Выберите город'
+    }
+    if (formData.budgetMin >= formData.budgetMax) {
+      newErrors.budget = 'Минимальный бюджет должен быть меньше максимального'
+    }
+    if (!formData.moveInDate) {
+      newErrors.moveInDate = 'Укажите дату заезда'
+    }
+    if (!formData.sleepSchedule) {
+      newErrors.sleepSchedule = 'Выберите режим сна'
+    }
+    if (!formData.smoking) {
+      newErrors.smoking = 'Выберите отношение к курению'
+    }
+    if (!formData.alcohol) {
+      newErrors.alcohol = 'Выберите отношение к алкоголю'
+    }
+    if (!formData.cleanliness) {
+      newErrors.cleanliness = 'Выберите уровень чистоплотности'
+    }
+    if (!formData.noiseLevel) {
+      newErrors.noiseLevel = 'Выберите уровень шума'
+    }
+    if (!formData.guests) {
+      newErrors.guests = 'Выберите частоту приёма гостей'
+    }
+    if (!formData.parties) {
+      newErrors.parties = 'Выберите отношение к вечеринкам'
+    }
+    if (!formData.pets) {
+      newErrors.pets = 'Выберите отношение к питомцам'
+    }
+    if (!formData.workFromHome) {
+      newErrors.workFromHome = 'Выберите режим работы'
+    }
+    if (!formData.cooking) {
+      newErrors.cooking = 'Выберите частоту готовки'
+    }
+    if (!formData.sharedSpaces) {
+      newErrors.sharedSpaces = 'Выберите отношение к общим пространствам'
+    }
+    if (!formData.wakeTime) {
+      newErrors.wakeTime = 'Выберите время подъёма'
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      setCurrentStep(0)
+      return
+    }
+
     setLoading(true)
     try {
       const response = await fetch('/api/onboarding', {
@@ -160,37 +329,42 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           profile: {
             city: formData.city,
-            budgetMin: formData.budgetMin ? parseInt(formData.budgetMin) : null,
-            budgetMax: formData.budgetMax ? parseInt(formData.budgetMax) : null,
-            moveInDate: formData.moveInDate ? new Date(formData.moveInDate) : null,
-            gender: formData.gender || null,
-            age: formData.age ? parseInt(formData.age) : null,
+            budgetMin: parseInt(formData.budgetMin.toString()),
+            budgetMax: parseInt(formData.budgetMax.toString()),
+            moveInDate: new Date(formData.moveInDate),
+            gender: formData.gender,
+            age: parseInt(formData.age.toString()),
           },
           survey: {
-            sleepSchedule: formData.sleepSchedule || null,
-            smoking: formData.smoking || null,
-            alcohol: formData.alcohol || null,
-            cleanliness: formData.cleanliness || null,
-            noiseLevel: formData.noiseLevel || null,
-            guests: formData.guests || null,
-            parties: formData.parties || null,
-            pets: formData.pets || null,
-            workFromHome: formData.workFromHome || null,
-            cooking: formData.cooking || null,
-            sharedSpaces: formData.sharedSpaces || null,
-            wakeTime: formData.wakeTime || null,
+            sleepSchedule: formData.sleepSchedule,
+            smoking: formData.smoking,
+            alcohol: formData.alcohol,
+            cleanliness: formData.cleanliness,
+            noiseLevel: formData.noiseLevel,
+            guests: formData.guests,
+            parties: formData.parties,
+            pets: formData.pets,
+            workFromHome: formData.workFromHome,
+            cooking: formData.cooking,
+            sharedSpaces: formData.sharedSpaces,
+            wakeTime: formData.wakeTime,
             bio: formData.bio || null,
           },
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save profile')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to save profile')
       }
 
+      const data = await response.json()
+      console.log('Profile saved:', data)
       router.push('/search')
+      router.refresh()
     } catch (error) {
       console.error('Onboarding error:', error)
+      setErrors({ submit: 'Ошибка при сохранении. Попробуйте ещё раз.' })
     } finally {
       setLoading(false)
     }
@@ -205,28 +379,32 @@ export default function OnboardingPage() {
               Основная информация
             </motion.h2>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Возраст</label>
+              <label className="block text-sm font-medium text-foreground/80">Возраст <span className="text-destructive">*</span></label>
               <input
                 type="number"
                 value={formData.age}
                 onChange={(e) => updateField('age', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.age ? 'border-destructive' : 'border-border'
+                }`}
                 placeholder="25"
               />
+              {errors.age && <p className="text-sm text-destructive mt-1">{errors.age}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Пол</label>
+              <label className="block text-sm font-medium text-foreground/80">Пол <span className="text-destructive">*</span></label>
               <select
                 value={formData.gender}
                 onChange={(e) => updateField('gender', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.gender ? 'border-destructive' : 'border-border'
+                }`}
               >
-                <option value="">Выберите...</option>
+                <option value="">Выберите пол...</option>
                 <option value="Male">Мужской</option>
                 <option value="Female">Женский</option>
-                <option value="Non-binary">Небинарный</option>
-                <option value="Other">Другой</option>
               </select>
+              {errors.gender && <p className="text-sm text-destructive mt-1">{errors.gender}</p>}
             </motion.div>
           </motion.div>
         )
@@ -238,45 +416,92 @@ export default function OnboardingPage() {
               Предпочтения по жилью
             </motion.h2>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Город</label>
-              <input
-                type="text"
+              <label className="block text-sm font-medium text-foreground/80">Город <span className="text-destructive">*</span></label>
+              <select
                 value={formData.city}
                 onChange={(e) => updateField('city', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                placeholder="Москва"
-              />
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.city ? 'border-destructive' : 'border-border'
+                }`}
+              >
+                <option value="">Выберите город...</option>
+                <optgroup label="Популярные города">
+                  {CITIES.filter(c => c.popular).map(city => (
+                    <option key={city.value} value={city.value}>{city.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Другие города">
+                  {CITIES.filter(c => !c.popular).map(city => (
+                    <option key={city.value} value={city.value}>{city.label}</option>
+                  ))}
+                </optgroup>
+              </select>
+              {errors.city && <p className="text-sm text-destructive mt-1">{errors.city}</p>}
             </motion.div>
-            <motion.div variants={fieldVariants} className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground/80">Мин. бюджет (₽)</label>
-                <input
-                  type="number"
-                  value={formData.budgetMin}
-                  onChange={(e) => updateField('budgetMin', e.target.value)}
-                  className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                  placeholder="30000"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground/80">Макс. бюджет (₽)</label>
-                <input
-                  type="number"
-                  value={formData.budgetMax}
-                  onChange={(e) => updateField('budgetMax', e.target.value)}
-                  className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                  placeholder="60000"
-                />
+            <motion.div variants={fieldVariants}>
+              <label className="block text-sm font-medium text-foreground/80 mb-4">
+                Бюджет в месяц (₽) <span className="text-destructive">*</span>
+              </label>
+              <div className="px-2">
+                <div className="flex justify-between text-sm text-foreground/60 mb-2">
+                  <span>от {formData.budgetMin.toLocaleString()}₽</span>
+                  <span>до {formData.budgetMax.toLocaleString()}₽</span>
+                </div>
+                <div className="relative h-12 bg-secondary rounded-lg">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100000"
+                    step="5000"
+                    value={formData.budgetMin}
+                    onChange={(e) => updateField('budgetMin', Math.min(parseInt(e.target.value), formData.budgetMax - 5000))}
+                    className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    style={{ pointerEvents: 'auto' }}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="100000"
+                    step="5000"
+                    value={formData.budgetMax}
+                    onChange={(e) => updateField('budgetMax', Math.max(parseInt(e.target.value), formData.budgetMin + 5000))}
+                    className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    style={{ pointerEvents: 'auto' }}
+                  />
+                  <div className="absolute top-1/2 left-0 right-0 h-2 -translate-y-1/2 mx-4">
+                    <div className="relative h-full">
+                      <div
+                        className="absolute h-full bg-primary/30 rounded-full"
+                        style={{
+                          left: `${(formData.budgetMin / 100000) * 100}%`,
+                          right: `${100 - (formData.budgetMax / 100000) * 100}%`,
+                        }}
+                      />
+                      <div
+                        className="absolute h-4 w-4 bg-primary rounded-full -top-1 shadow-md transition-all"
+                        style={{ left: `calc(${(formData.budgetMin / 100000) * 100}% - 8px)` }}
+                      />
+                      <div
+                        className="absolute h-4 w-4 bg-primary rounded-full -top-1 shadow-md transition-all"
+                        style={{ left: `calc(${(formData.budgetMax / 100000) * 100}% - 8px)` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {errors.budget && <p className="text-sm text-destructive mt-1">{errors.budget}</p>}
               </div>
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Дата заезда</label>
+              <label className="block text-sm font-medium text-foreground/80">Дата заезда <span className="text-destructive">*</span></label>
               <input
                 type="date"
                 value={formData.moveInDate}
                 onChange={(e) => updateField('moveInDate', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.moveInDate ? 'border-destructive' : 'border-border'
+                }`}
               />
+              {errors.moveInDate && <p className="text-sm text-destructive mt-1">{errors.moveInDate}</p>}
             </motion.div>
           </motion.div>
         )
@@ -288,56 +513,68 @@ export default function OnboardingPage() {
               Привычки и образ жизни
             </motion.h2>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Режим сна</label>
+              <label className="block text-sm font-medium text-foreground/80">Режим сна <span className="text-destructive">*</span></label>
               <select
                 value={formData.sleepSchedule}
                 onChange={(e) => updateField('sleepSchedule', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.sleepSchedule ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {SLEEP_SCHEDULES.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.sleepSchedule && <p className="text-sm text-destructive mt-1">{errors.sleepSchedule}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Курение</label>
+              <label className="block text-sm font-medium text-foreground/80">Курение <span className="text-destructive">*</span></label>
               <select
                 value={formData.smoking}
                 onChange={(e) => updateField('smoking', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.smoking ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {SMOKING_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.smoking && <p className="text-sm text-destructive mt-1">{errors.smoking}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Алкоголь</label>
+              <label className="block text-sm font-medium text-foreground/80">Алкоголь <span className="text-destructive">*</span></label>
               <select
                 value={formData.alcohol}
                 onChange={(e) => updateField('alcohol', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.alcohol ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {ALCOHOL_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.alcohol && <p className="text-sm text-destructive mt-1">{errors.alcohol}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Чистоплотность</label>
+              <label className="block text-sm font-medium text-foreground/80">Чистоплотность <span className="text-destructive">*</span></label>
               <select
                 value={formData.cleanliness}
                 onChange={(e) => updateField('cleanliness', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.cleanliness ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {CLEANLINESS_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.cleanliness && <p className="text-sm text-destructive mt-1">{errors.cleanliness}</p>}
             </motion.div>
           </motion.div>
         )
@@ -349,56 +586,68 @@ export default function OnboardingPage() {
               Социальные предпочтения
             </motion.h2>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Уровень шума</label>
+              <label className="block text-sm font-medium text-foreground/80">Уровень шума <span className="text-destructive">*</span></label>
               <select
                 value={formData.noiseLevel}
                 onChange={(e) => updateField('noiseLevel', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.noiseLevel ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {NOISE_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.noiseLevel && <p className="text-sm text-destructive mt-1">{errors.noiseLevel}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Гости</label>
+              <label className="block text-sm font-medium text-foreground/80">Гости <span className="text-destructive">*</span></label>
               <select
                 value={formData.guests}
                 onChange={(e) => updateField('guests', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.guests ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {GUESTS_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.guests && <p className="text-sm text-destructive mt-1">{errors.guests}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Вечеринки</label>
+              <label className="block text-sm font-medium text-foreground/80">Вечеринки <span className="text-destructive">*</span></label>
               <select
                 value={formData.parties}
                 onChange={(e) => updateField('parties', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.parties ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {PARTIES_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.parties && <p className="text-sm text-destructive mt-1">{errors.parties}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Питомцы</label>
+              <label className="block text-sm font-medium text-foreground/80">Питомцы <span className="text-destructive">*</span></label>
               <select
                 value={formData.pets}
                 onChange={(e) => updateField('pets', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.pets ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {PETS_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.pets && <p className="text-sm text-destructive mt-1">{errors.pets}</p>}
             </motion.div>
           </motion.div>
         )
@@ -409,57 +658,78 @@ export default function OnboardingPage() {
             <motion.h2 variants={fieldVariants} className="text-2xl font-display font-semibold text-foreground">
               Ещё о вас
             </motion.h2>
+            {errors.submit && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg"
+              >
+                <p className="text-sm text-destructive">{errors.submit}</p>
+              </motion.div>
+            )}
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Работа из дома</label>
+              <label className="block text-sm font-medium text-foreground/80">Работа из дома <span className="text-destructive">*</span></label>
               <select
                 value={formData.workFromHome}
                 onChange={(e) => updateField('workFromHome', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.workFromHome ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {WORK_FROM_HOME_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.workFromHome && <p className="text-sm text-destructive mt-1">{errors.workFromHome}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Готовка</label>
+              <label className="block text-sm font-medium text-foreground/80">Готовка <span className="text-destructive">*</span></label>
               <select
                 value={formData.cooking}
                 onChange={(e) => updateField('cooking', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.cooking ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {COOKING_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.cooking && <p className="text-sm text-destructive mt-1">{errors.cooking}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Общие пространства</label>
+              <label className="block text-sm font-medium text-foreground/80">Общие пространства <span className="text-destructive">*</span></label>
               <select
                 value={formData.sharedSpaces}
                 onChange={(e) => updateField('sharedSpaces', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.sharedSpaces ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {SHARED_SPACES_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.sharedSpaces && <p className="text-sm text-destructive mt-1">{errors.sharedSpaces}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
-              <label className="block text-sm font-medium text-foreground/80">Время подъёма</label>
+              <label className="block text-sm font-medium text-foreground/80">Время подъёма <span className="text-destructive">*</span></label>
               <select
                 value={formData.wakeTime}
                 onChange={(e) => updateField('wakeTime', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                  errors.wakeTime ? 'border-destructive' : 'border-border'
+                }`}
               >
                 <option value="">Выберите...</option>
                 {WAKE_TIME_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.wakeTime && <p className="text-sm text-destructive mt-1">{errors.wakeTime}</p>}
             </motion.div>
             <motion.div variants={fieldVariants}>
               <label className="block text-sm font-medium text-foreground/80">О себе</label>
