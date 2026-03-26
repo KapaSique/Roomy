@@ -12,12 +12,18 @@ const firstNames = [
   'Анастасия', 'Виктория', 'Дарья', 'Полина', 'Ксения'
 ]
 
-const lastNames = [
+// Male last names
+const lastNamesMale = [
   'Иванов', 'Смирнов', 'Кузнецов', 'Попов', 'Васильев',
   'Петров', 'Соколов', 'Михайлов', 'Новиков', 'Фёдоров',
   'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Семёнов',
-  'Егоров', 'Павлов', 'Козлов', 'Степанов', 'Николаев',
-  'Орлов', 'Андреев', 'Макаров', 'Никитин', 'Захаров'
+]
+
+// Female last names (with -a ending)
+const lastNamesFemale = [
+  'Иванова', 'Смирнова', 'Кузнецова', 'Попова', 'Васильева',
+  'Петрова', 'Соколова', 'Михайлова', 'Новикова', 'Фёдорова',
+  'Морозова', 'Волкова', 'Алексеева', 'Лебедева', 'Семёнова',
 ]
 
 // Latin transliteration for emails
@@ -33,8 +39,6 @@ const lastNamesLatin = [
   'ivanov', 'smirnov', 'kuznetsov', 'popov', 'vasilyev',
   'petrov', 'sokolov', 'mikhailov', 'novikov', 'fedorov',
   'morozov', 'volkov', 'alekseev', 'lebedev', 'semenov',
-  'egorov', 'pavlov', 'kozlov', 'stepanov', 'nikolaev',
-  'orlov', 'andreev', 'makarov', 'nikitin', 'zakharov'
 ]
 
 const cities = ['Москва', 'Санкт-Петербург', 'Якутск', 'Казань', 'Новосибирск']
@@ -61,7 +65,7 @@ const bios = [
   'Фотограф, работаю над проектами, часто отсутствую.',
   'Шеф-повар, люблю кулинарные эксперименты.',
   'Фитнес-тренер, ранние подъёмы, здоровый образ жизни.',
-  'Медбрат/медсестра, сменная работа, тишина во время сна.',
+  'Медсестра, сменная работа, тишина во время сна.',
   'Юрист, работаю в офисе, аккуратный.',
   'Бухгалтер, организованный и чистоплотный.',
   'Разработчик, основатель стартапа, занят, но уважителен.'
@@ -99,9 +103,14 @@ async function main() {
 
   for (let i = 0; i < 25; i++) {
     const firstName = firstNames[i]
-    const lastName = lastNames[i]
     const firstNameLatin = firstNamesLatin[i]
-    const lastNameLatin = lastNamesLatin[i]
+    const lastNameLatin = lastNamesLatin[i % lastNamesLatin.length]
+
+    // Use female last names for female users (indices 10-24)
+    const isFemale = i >= 10
+    const lastName = isFemale
+      ? lastNamesFemale[i % lastNamesFemale.length]
+      : lastNamesMale[i % lastNamesMale.length]
 
     // Email on latin characters
     const email = `${firstNameLatin}.${lastNameLatin}@example.com`
@@ -120,7 +129,7 @@ async function main() {
             budgetMax: 50000 + Math.floor(Math.random() * 50000),
             moveInDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000),
             bio: bios[i],
-            gender: pickRandom(['Male', 'Female']),
+            gender: isFemale ? 'Female' : 'Male',
             age: 20 + Math.floor(Math.random() * 20),
           },
         },

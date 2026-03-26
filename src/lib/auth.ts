@@ -16,7 +16,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log('[Auth] Authorize called with email:', credentials?.email)
+
         if (!credentials?.email || !credentials?.password) {
+          console.log('[Auth] Missing credentials')
           return null
         }
 
@@ -28,7 +31,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
         })
 
+        console.log('[Auth] User found:', user?.id, user?.email)
+
         if (!user) {
+          console.log('[Auth] User not found')
           return null
         }
 
@@ -37,16 +43,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user.passwordHash
         )
 
+        console.log('[Auth] Password valid:', isPasswordValid)
+
         if (!isPasswordValid) {
+          console.log('[Auth] Invalid password')
           return null
         }
 
-        return {
+        const authUser = {
           id: user.id,
           email: user.email,
           name: user.name,
           avatarUrl: user.avatarUrl,
         }
+        console.log('[Auth] Returning user:', authUser)
+        return authUser
       },
     }),
   ],

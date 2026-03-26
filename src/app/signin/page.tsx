@@ -12,48 +12,28 @@ export default function SignInPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [csrfToken, setCsrfToken] = useState('')
-
-  useEffect(() => {
-    // Get CSRF token on mount
-    fetch('/api/auth/csrf')
-      .then(res => res.json())
-      .then(data => setCsrfToken(data.csrfToken))
-      .catch(console.error)
-  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    try {
-      // Use form POST instead of signIn() to properly handle CSRF
-      const formData = new FormData()
-      formData.append('email', email)
-      formData.append('password', password)
-      if (csrfToken) formData.append('csrfToken', csrfToken)
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+      callbackUrl: '/search',
+    })
 
-      const response = await fetch('/api/auth/callback/credentials', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams(formData as any),
-        redirect: 'manual',
-      })
+    setLoading(false)
 
-      if (response.status === 302 || response.status === 200) {
-        router.push('/search')
-        router.refresh()
-      } else {
-        setError('Неверный email или пароль')
-      }
-    } catch (err) {
-      console.error('Sign in exception:', err)
+    if (result?.error) {
+      console.error('Sign in error:', result.error)
+      setError('Неверный email или пароль')
+    } else if (result?.url) {
+      router.push(result.url)
+    } else {
       setError('Что-то пошло не так')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -83,8 +63,9 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
               className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-              placeholder="you@example.com"
+              placeholder="aleksandr.ivanov@example.com"
             />
           </div>
 
@@ -98,6 +79,7 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="••••••••"
             />
