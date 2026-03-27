@@ -74,14 +74,8 @@ export default function SignInPage() {
   }
 
   async function handleGosuslugiSignIn() {
-    // Редирект на портал Госуслуг (ЕСИА) для входа
-    // После входа Госуслуги вернут пользователя на callbackUrl
-    const redirectUri = encodeURIComponent(`${window.location.origin}/search`)
-    const scope = encodeURIComponent('fullname snils email')
-
-    // Для демонстрации используем тестовый стенд ЕСИА
-    // В production: https://esia.gosuslugi.ru
-    window.location.href = `https://esia.gosuslugi.ru/idp/rso.js?redirect_uri=${redirectUri}&scope=${scope}&response_type=code`
+    // Редирект на страницу входа Госуслуг
+    window.location.href = 'https://esia.gosuslugi.ru/login/'
   }
 
   return (
