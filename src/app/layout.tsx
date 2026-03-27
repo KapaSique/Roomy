@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/SessionProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["cyrillic", "latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <SessionProvider>
           {children}
+          <Toaster />
         </SessionProvider>
       </body>
     </html>

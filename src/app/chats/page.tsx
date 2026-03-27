@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
+import { useToast } from '@/lib/hooks/use-toast'
 
 type Chat = {
   id: string
@@ -30,6 +31,7 @@ function ChatsContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session } = useSession()
+  const { success, error: showError } = useToast()
   const [chats, setChats] = useState<Chat[]>([])
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -86,9 +88,13 @@ function ChatsContent() {
         setNewMessage('')
         fetchMessages(selectedChat)
         fetchChats()
+        success('Сообщение отправлено')
+      } else {
+        showError('Не удалось отправить сообщение')
       }
     } catch (error) {
       console.error('Failed to send message:', error)
+      showError('Не удалось отправить сообщение')
     }
   }
 

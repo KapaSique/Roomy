@@ -5,9 +5,11 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useToast } from '@/lib/hooks/use-toast'
 
 export default function SignInPage() {
   const router = useRouter()
+  const { success, error: showError } = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -30,10 +32,13 @@ export default function SignInPage() {
     if (result?.error) {
       console.error('Sign in error:', result.error)
       setError('Неверный email или пароль')
+      showError('Неверный email или пароль')
     } else if (result?.url) {
+      success('Успешный вход!')
       router.push(result.url)
     } else {
       setError('Что-то пошло не так')
+      showError('Что-то пошло не так')
     }
   }
 

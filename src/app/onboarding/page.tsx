@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useToast } from '@/lib/hooks/use-toast'
 
 const STEPS = [
   { id: 'basic', title: 'Основное' },
@@ -137,6 +138,7 @@ const fieldVariants = {
 export default function OnboardingPage() {
   const router = useRouter()
   const { data: session } = useSession()
+  const { success, error: showError } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -360,11 +362,13 @@ export default function OnboardingPage() {
 
       const data = await response.json()
       console.log('Profile saved:', data)
+      success('Профиль успешно заполнен!')
       router.push('/search')
       router.refresh()
     } catch (error) {
       console.error('Onboarding error:', error)
       setErrors({ submit: 'Ошибка при сохранении. Попробуйте ещё раз.' })
+      showError('Ошибка при сохранении профиля')
     } finally {
       setLoading(false)
     }

@@ -5,9 +5,11 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useToast } from '@/lib/hooks/use-toast'
 
 export default function SignUpPage() {
   const router = useRouter()
+  const { success, error: showError } = useToast()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,6 +32,7 @@ export default function SignUpPage() {
 
       if (!response.ok) {
         setError(data.error || 'Что-то пошло не так')
+        showError(data.error || 'Что-то пошло не так')
         setLoading(false)
         return
       }
@@ -42,12 +45,15 @@ export default function SignUpPage() {
 
       if (result?.error) {
         setError('Аккаунт создан, но вход не удался')
+        showError('Аккаунт создан, но вход не удался')
       } else {
+        success('Аккаунт успешно создан!')
         router.push('/onboarding')
         router.refresh()
       }
     } catch (err) {
       setError('Что-то пошло не так')
+      showError('Что-то пошло не так')
     } finally {
       setLoading(false)
     }
