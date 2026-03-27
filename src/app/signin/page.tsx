@@ -1,11 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useToast } from '@/lib/hooks/use-toast'
+
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
 
 export default function SignInPage() {
   const router = useRouter()
@@ -14,9 +18,34 @@ export default function SignInPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [touched, setTouched] = useState({ email: false, password: false })
+
+  const getEmailValidationMessage = (): string => {
+    if (!touched.email) return ''
+    if (!validateEmail(email)) return 'Некорректный email'
+    return ''
+  }
+
+  const getPasswordValidationMessage = (): string => {
+    if (!touched.password) return ''
+    if (password.length < 1) return 'Введите пароль'
+    return ''
+  }
+
+  const isFormValid = (): boolean => {
+    return validateEmail(email) && password.length >= 1
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    setTouched({ email: true, password: true })
+
+    if (!isFormValid()) {
+      showError('Заполните все поля корректно')
+      return
+    }
+
     setError('')
     setLoading(true)
 
@@ -67,11 +96,17 @@ export default function SignInPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setTouched({ ...touched, email: true })}
               required
               autoComplete="email"
-              className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground placeholder-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                touched.email && !validateEmail(email) ? 'border-destructive' : 'border-border'
+              }`}
               placeholder="aleksandr.ivanov@example.com"
             />
+            {getEmailValidationMessage() && (
+              <p className="text-sm text-destructive mt-1">{getEmailValidationMessage()}</p>
+            )}
           </div>
 
           <div>
@@ -83,11 +118,17 @@ export default function SignInPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => setTouched({ ...touched, password: true })}
               required
               autoComplete="current-password"
-              className="mt-1 block w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className={`mt-1 block w-full px-4 py-3 border rounded-lg bg-background text-foreground placeholder-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                touched.password && password.length === 0 ? 'border-destructive' : 'border-border'
+              }`}
               placeholder="••••••••"
             />
+            {getPasswordValidationMessage() && (
+              <p className="text-sm text-destructive mt-1">{getPasswordValidationMessage()}</p>
+            )}
           </div>
 
           {error && (
@@ -102,7 +143,7 @@ export default function SignInPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !isFormValid()}
             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? 'Вход...' : 'Войти'}
