@@ -74,11 +74,20 @@ export default function SignInPage() {
   }
 
   async function handleGosuslugiSignIn() {
-    try {
-      await signIn('gosuslugi', { callbackUrl: '/search' })
-    } catch (error) {
-      console.error('Госуслуги вход ошибка:', error)
-      showError('Ошибка входа через Госуслуги')
+    // Проверяем, настроены ли реальные переменные Госуслуг
+    const gosuslugiEnabled = process.env.NEXT_PUBLIC_GOSUSLUGI_ENABLED === 'true'
+
+    if (gosuslugiEnabled) {
+      // Реальный OAuth2 flow с ЕСИА — редирект на портал Госуслуг
+      const clientId = process.env.NEXT_PUBLIC_GOSUSLUGI_CLIENT_ID
+      const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/gosuslugi`)
+      const scope = encodeURIComponent('fullname snils email')
+      const state = 'roomy-auth-state'
+
+      window.location.href = `https://esia.gosuslugi.ru/idp/rso.js?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_type=code`
+    } else {
+      // Mock-режим для демонстрации — редирект на наш API endpoint
+      window.location.href = '/api/auth/gosuslugi?callbackUrl=' + encodeURIComponent('/search')
     }
   }
 
