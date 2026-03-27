@@ -31,6 +31,21 @@ export const metadata: Metadata = {
     description: "Подбор соседей по совместимости привычек и образа жизни",
     type: "website",
     locale: "ru_RU",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "Roomy — Найди идеального соседа",
+      },
+    ],
+    siteName: "Roomy",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Roomy — Найди идеального соседа",
+    description: "Подбор соседей по совместимости привычек и образа жизни",
+    images: ["/og-image.svg"],
   },
   robots: {
     index: true,
