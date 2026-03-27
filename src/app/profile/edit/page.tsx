@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -140,8 +142,8 @@ export default function EditProfilePage() {
 
 function EditProfileContent() {
   const router = useRouter()
-  const { data: session, update: updateSession } = useSession()
-  const { success, error: showError, loading: showLoading } = useToast()
+  const { update: updateSession } = useSession()
+  const { success, error: showError } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'basic' | 'habits' | 'danger'>('basic')
@@ -176,6 +178,7 @@ function EditProfileContent() {
 
   useEffect(() => {
     fetchProfile()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function fetchProfile() {
@@ -344,6 +347,7 @@ function EditProfileContent() {
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">Аватар</label>
                   <div className="flex gap-4 items-start">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={profile.avatarUrl || '/default-avatar.png'}
                       alt="Avatar"

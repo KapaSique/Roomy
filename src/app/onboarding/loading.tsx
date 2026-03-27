@@ -1,7 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
-
 export default function OnboardingLoading() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 py-12 px-4">

@@ -1,4 +1,5 @@
 'use client'
+export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -119,7 +120,7 @@ const stepVariants = {
     x: 0,
     transition: {
       duration: 0.4,
-      ease: [0.25, 0.46, 0.45, 0.94],
+      ease: [0.25, 0.46, 0.45, 0.94] as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       staggerChildren: 0.1,
     },
   },
@@ -137,7 +138,7 @@ const fieldVariants = {
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  useSession()
   const { success, error: showError } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -183,7 +184,8 @@ export default function OnboardingPage() {
     const newErrors: Record<string, string> = {}
 
     if (currentStep === 0) {
-      if (!formData.age || formData.age < 18 || formData.age > 100) {
+      const ageNum = parseInt(formData.age)
+      if (!formData.age || isNaN(ageNum) || ageNum < 18 || ageNum > 100) {
         newErrors.age = 'Укажите возраст от 18 до 100'
       }
       if (!formData.gender) {
@@ -265,7 +267,8 @@ export default function OnboardingPage() {
     // Final validation
     const newErrors: Record<string, string> = {}
 
-    if (!formData.age || formData.age < 18 || formData.age > 100) {
+    const ageNum = parseInt(formData.age)
+    if (!formData.age || isNaN(ageNum) || ageNum < 18 || ageNum > 100) {
       newErrors.age = 'Укажите возраст от 18 до 100'
     }
     if (!formData.gender) {

@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+
+export const dynamic = 'force-dynamic'
 import { motion } from 'framer-motion'
 
 export default function Home() {
@@ -124,7 +126,7 @@ export default function Home() {
                 description: 'Свяжитесь с потенциальным соседом и узнайте, подходите ли вы друг другу.',
                 delay: 0.3,
               },
-            ].map((feature, index) => (
+            ].map((feature) => (
               <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 30 }}

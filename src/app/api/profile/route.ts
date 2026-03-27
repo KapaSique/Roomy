@@ -104,7 +104,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     const session = await auth()
 
@@ -128,10 +128,7 @@ export async function DELETE(request: NextRequest) {
     // Delete messages
     await prisma.message.deleteMany({
       where: {
-        OR: [
-          { senderId: session.user.id },
-          { receiverId: session.user.id },
-        ],
+        senderId: session.user.id,
       },
     })
 

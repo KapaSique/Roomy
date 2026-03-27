@@ -93,7 +93,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.4,
-      ease: [0.25, 0.46, 0.45, 0.94],
+      ease: [0.25, 0.46, 0.45, 0.94] as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   },
 }
@@ -115,6 +115,7 @@ export default function UserProfilePage() {
     if (session?.user?.id) {
       fetchCurrentUser()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, session])
 
   useEffect(() => {

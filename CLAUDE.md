@@ -97,3 +97,49 @@ weighted_score = Σ(parameter_score × weight) / Σ(max_score × weight) × 100
 - `NEXTAUTH_SECRET` — Secret for NextAuth
 - `NEXTAUTH_URL` — App URL (localhost:3000 для dev)
 - `TELEGRAM_BOT_TOKEN` — Для Telegram Login Widget
+- `GOSUSLUGI_CLIENT_ID` — ЕСИА (Госуслуги) OAuth2 client ID (опционально)
+- `GOSUSLUGI_CLIENT_SECRET` — ЕСИА (Госуслуги) OAuth2 client secret (опционально)
+
+**Примечание:** Провайдер Госуслуг включается автоматически при наличии `GOSUSLUGI_CLIENT_ID` и `GOSUSLUGI_CLIENT_SECRET`
+
+## Commands
+
+```bash
+# Development
+npm run dev          # Запуск dev-сервера
+npm run build        # Production сборка
+npm run start        # Запуск production сервера
+npm run lint         # ESLint проверка
+
+# Database
+npm run db:generate  # Prisma client generation
+npm run db:push      # Push schema to database
+npm run db:seed      # Seed database with demo data (25 users)
+
+# Testing
+npm test             # Запуск unit-тестов (matching algorithm)
+```
+
+## Architecture Notes
+
+**Path Alias:** `@/*` → `./src/*` (настроено в `tsconfig.json`)
+
+**Database:** SQLite для разработки (`prisma/dev.db`), PostgreSQL для продакшена
+
+**Auth:** NextAuth v5 credentials provider с JWT сессиями, хеширование паролей через bcryptjs
+
+**API Routes:** Все endpoints в `app/api/**/route.ts` используют Next.js App Router conventions
+
+**Testing:** Vitest с `jsdom` окружением, тесты только на алгоритм совместимости (`src/lib/matching.test.ts`)
+
+**UI Components:** shadcn/ui компоненты в `src/components/ui/`, кастомные компоненты в `src/components/`
+
+**Demo Credentials:** Все демо-пользователи имеют пароль `password123`
+
+## Build Notes
+
+**Static Generation:** Все страницы помечены `export const dynamic = 'force-dynamic'` для отключения статической генерации (требуется для работы с динамическими данными и framer-motion)
+
+**Known Warnings:** При сборке возникают предупреждения о bcryptjs и jose — это нормально, они работают в Node.js runtime, не в Edge
+
+**Framer Motion:** Все компоненты с `motion` должны иметь `'use client'` директиву

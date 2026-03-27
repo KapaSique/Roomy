@@ -4,7 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "@/components/SessionProvider";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { OfflineBanner } from "@/lib/hooks/use-online";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["cyrillic", "latin"],

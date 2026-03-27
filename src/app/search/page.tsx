@@ -69,7 +69,7 @@ const itemVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       stiffness: 100,
       damping: 20,
       mass: 1,
@@ -78,22 +78,10 @@ const itemVariants = {
   },
 }
 
-const fadeInVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-}
-
 function SearchContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { success, error: showError } = useToast()
+  const { error: showError } = useToast()
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -143,6 +131,7 @@ function SearchContent() {
 
   useEffect(() => {
     fetchMatches()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -153,6 +142,7 @@ function SearchContent() {
       budgetMax: budgetMaxFilter,
       hideDealbreakers: hideDealbreakersFilter,
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
   async function fetchMatches() {
@@ -286,7 +276,6 @@ function SearchContent() {
         setFilters={setLocalFilters}
         onApply={applyFilters}
         onReset={resetFilters}
-        hasActiveFilters={hasActiveFilters}
       />
 
       {/* Main Content */}
@@ -529,6 +518,7 @@ function SearchContent() {
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: 'spring', stiffness: 300 }}
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={match.user.avatarUrl || '/default-avatar.png'}
                           alt={match.user.name}

@@ -1,7 +1,6 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
 
 const CITIES = [
   'Москва', 'Санкт-Петербург', 'Якутск', 'Казань', 'Новосибирск',
@@ -19,10 +18,9 @@ type FilterDrawerProps = {
     budgetMax: number
     hideDealbreakers: boolean
   }
-  setFilters: (filters: any) => void
+  setFilters: (filters: React.SetStateAction<FilterDrawerProps['filters']>) => void
   onApply: () => void
   onReset: () => void
-  hasActiveFilters: boolean
 }
 
 export function FilterDrawer({
@@ -32,7 +30,6 @@ export function FilterDrawer({
   setFilters,
   onApply,
   onReset,
-  hasActiveFilters,
 }: FilterDrawerProps) {
   return (
     <AnimatePresence>

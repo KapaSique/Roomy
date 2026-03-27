@@ -1,7 +1,9 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect, Suspense, useRef } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
@@ -34,7 +36,6 @@ type UserStatus = 'online' | 'offline' | 'away'
 
 function ChatsContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const { data: session } = useSession()
   const { success, error: showError } = useToast()
   const [chats, setChats] = useState<Chat[]>([])
@@ -43,7 +44,6 @@ function ChatsContent() {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
-  const [typing, setTyping] = useState(false)
   const [userStatus, setUserStatus] = useState<Record<string, UserStatus>>({})
   const [isTyping, setIsTyping] = useState(false)
 
@@ -78,6 +78,7 @@ function ChatsContent() {
     }, 5000)
 
     return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -270,6 +271,7 @@ function ChatsContent() {
                     }`}
                   >
                     <div className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={chat.otherUser.avatarUrl || '/default-avatar.png'}
                         alt={chat.otherUser.name}
@@ -318,6 +320,7 @@ function ChatsContent() {
                 <div className="p-4 border-b">
                   <div className="flex items-center gap-3">
                     <div className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={chats.find(c => c.otherUser.id === selectedChat)?.otherUser.avatarUrl || '/default-avatar.png'}
                         alt="Avatar"

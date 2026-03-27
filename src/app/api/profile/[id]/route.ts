@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth'
 const prisma = new PrismaClient()
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -34,8 +34,16 @@ export async function GET(
       )
     }
 
-    // Don't expose passwordHash
-    const { passwordHash, ...userWithoutPassword } = user
+    const userWithoutPassword = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      profile: user.profile,
+      survey: user.survey,
+    }
 
     return NextResponse.json({ user: userWithoutPassword })
   } catch (error) {

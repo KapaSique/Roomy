@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { auth } from '@/lib/auth'
 
 const prisma = new PrismaClient()
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const { profile, survey } = await request.json()
 
     // Filter only valid profile fields
-    const profileData: Prisma.ProfileCreateInput = {
+    const profileData = {
       city: profile?.city || null,
       budgetMin: profile?.budgetMin ? parseInt(profile.budgetMin) : null,
       budgetMax: profile?.budgetMax ? parseInt(profile.budgetMax) : null,
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Filter only valid survey fields
-    const surveyData: Prisma.SurveyCreateInput = {
+    const surveyData = {
       sleepSchedule: survey?.sleepSchedule || null,
       smoking: survey?.smoking || null,
       alcohol: survey?.alcohol || null,
