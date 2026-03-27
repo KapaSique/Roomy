@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SearchPageSkeletons } from '@/components/ui/skeletons'
 import { useToast } from '@/lib/hooks/use-toast'
+import { FilterDrawer } from '@/components/FilterDrawer'
+import { MobileMenu } from '@/components/MobileMenu'
 
 type Match = {
   user: {
@@ -251,7 +253,8 @@ function SearchContent() {
           <Link href="/" className="text-2xl font-display font-semibold text-primary">
             Roomy
           </Link>
-          <nav className="flex gap-4">
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex gap-4">
             <Link
               href="/profile"
               className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors"
@@ -265,8 +268,26 @@ function SearchContent() {
               Сообщения
             </Link>
           </nav>
+          {/* Mobile Menu */}
+          <MobileMenu
+            links={[
+              { href: '/profile', label: 'Профиль' },
+              { href: '/chats', label: 'Сообщения' },
+            ]}
+          />
         </div>
       </motion.header>
+
+      {/* Filter Drawer for Mobile */}
+      <FilterDrawer
+        isOpen={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        filters={localFilters}
+        setFilters={setLocalFilters}
+        onApply={applyFilters}
+        onReset={resetFilters}
+        hasActiveFilters={hasActiveFilters}
+      />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
@@ -291,11 +312,12 @@ function SearchContent() {
             )}
           </div>
           <div className="flex gap-2">
+            {/* Desktop Filter Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+              className={`hidden lg:flex px-4 py-2 rounded-lg transition-all items-center gap-2 ${
                 filtersOpen || hasActiveFilters
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-card text-foreground hover:bg-secondary'
@@ -306,17 +328,31 @@ function SearchContent() {
               </svg>
               Фильтры
             </motion.button>
+            {/* Mobile Filter Button - opens drawer */}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setFiltersOpen(true)}
+              className={`lg:hidden px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                hasActiveFilters
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-foreground hover:bg-secondary'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+            </motion.button>
           </div>
         </motion.div>
 
-        {/* Filters Panel */}
+        {/* Filters Panel - Desktop Only */}
         <AnimatePresence>
           {filtersOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-card rounded-2xl shadow-md p-6 mb-6 overflow-hidden"
+              className="hidden lg:block bg-card rounded-2xl shadow-md p-6 mb-6 overflow-hidden"
             >
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* City Filter */}

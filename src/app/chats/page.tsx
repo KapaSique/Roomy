@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { useToast } from '@/lib/hooks/use-toast'
 import { ChatListSkeleton, MessageViewSkeleton } from '@/components/ui/skeletons'
+import { MobileMenu } from '@/components/MobileMenu'
 
 type Chat = {
   id: string
@@ -220,7 +221,8 @@ function ChatsContent() {
       <header className="bg-card border-b shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-display font-semibold text-primary">Roomy</Link>
-          <nav className="flex gap-4">
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex gap-4">
             <Link href="/search" className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors">
               Поиск
             </Link>
@@ -228,6 +230,13 @@ function ChatsContent() {
               Профиль
             </Link>
           </nav>
+          {/* Mobile Menu */}
+          <MobileMenu
+            links={[
+              { href: '/search', label: 'Поиск' },
+              { href: '/profile', label: 'Профиль' },
+            ]}
+          />
         </div>
       </header>
 

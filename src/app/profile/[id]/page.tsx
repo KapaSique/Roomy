@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProfileComparison } from '@/components/ProfileComparison'
 import { ProfileSkeleton } from '@/components/ui/skeletons'
+import { MobileMenu } from '@/components/MobileMenu'
 
 type UserProfile = {
   id: string
@@ -186,7 +187,8 @@ export default function UserProfilePage() {
       >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-display font-semibold text-primary">Roomy</Link>
-          <nav className="flex gap-4">
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex gap-4">
             <Link href="/search" className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors">
               Поиск
             </Link>
@@ -199,6 +201,14 @@ export default function UserProfilePage() {
               </Link>
             )}
           </nav>
+          {/* Mobile Menu */}
+          <MobileMenu
+            links={[
+              { href: '/search', label: 'Поиск' },
+              { href: '/chats', label: 'Сообщения' },
+              ...(isOwnProfile ? [{ href: '/profile/edit', label: 'Редактировать' }] : []),
+            ]}
+          />
         </div>
       </motion.header>
 
