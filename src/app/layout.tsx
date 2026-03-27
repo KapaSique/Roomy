@@ -3,6 +3,8 @@ import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/SessionProvider";
 import { Toaster } from "@/components/ui/sonner";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { OfflineBanner } from "@/lib/hooks/use-online";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["cyrillic", "latin"],
@@ -16,8 +18,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Roomy — Найди идеального соседа",
-  description: "Подбор соседей по совместимости привычек и образа жизни",
+  title: {
+    default: "Roomy — Найди идеального соседа",
+    template: "%s | Roomy",
+  },
+  description: "Подбор соседей по совместимости привычек и образа жизни. Найди соседа мечты через анализ совместимости.",
+  keywords: ["соседи", "совместимость", "аренда", "жильё", "roommate", "matching"],
+  authors: [{ name: "Roomy Team" }],
+  manifest: "/manifest.json",
+  openGraph: {
+    title: "Roomy — Найди идеального соседа",
+    description: "Подбор соседей по совместимости привычек и образа жизни",
+    type: "website",
+    locale: "ru_RU",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,10 +50,13 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${cormorant.variable} ${inter.variable}`}>
       <body className="font-sans antialiased">
-        <SessionProvider>
-          {children}
-          <Toaster />
-        </SessionProvider>
+        <ErrorBoundary>
+          <SessionProvider>
+            {children}
+            <Toaster />
+            <OfflineBanner />
+          </SessionProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
