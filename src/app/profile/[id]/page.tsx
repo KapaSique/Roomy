@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ProfileComparison } from '@/components/ProfileComparison'
+import { ProfileSkeleton } from '@/components/ui/skeletons'
 
 type UserProfile = {
   id: string
@@ -100,14 +102,19 @@ export default function UserProfilePage() {
   const router = useRouter()
   const { data: session } = useSession()
   const [user, setUser] = useState<UserProfile | null>(null)
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [isOwnProfile, setIsOwnProfile] = useState(false)
+  const [showComparison, setShowComparison] = useState(false)
 
   useEffect(() => {
     if (params.id) {
       fetchUser(params.id as string)
     }
-  }, [params.id])
+    if (session?.user?.id) {
+      fetchCurrentUser()
+    }
+  }, [params.id, session])
 
   useEffect(() => {
     if (session?.user?.id && params.id) {
@@ -132,14 +139,34 @@ export default function UserProfilePage() {
     }
   }
 
+  async function fetchCurrentUser() {
+    try {
+      const response = await fetch('/api/me')
+      const data = await response.json()
+
+      if (response.ok) {
+        setCurrentUser(data.user)
+      }
+    } catch (error) {
+      console.error('Failed to fetch current user:', error)
+    }
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
-        />
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
+        <div className="bg-card border-b shadow-sm">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="h-8 w-20 bg-secondary rounded" />
+            <div className="flex gap-4">
+              <div className="h-8 w-16 bg-secondary rounded" />
+              <div className="h-8 w-24 bg-secondary rounded" />
+            </div>
+          </div>
+        </div>
+        <main className="container mx-auto px-4 py-8">
+          <ProfileSkeleton />
+        </main>
       </div>
     )
   }
@@ -208,21 +235,33 @@ export default function UserProfilePage() {
               </div>
             </div>
 
-            {!isOwnProfile && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mt-6"
-              >
-                <Link
-                  href={`/chats?userId=${user.id}`}
-                  className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Написать сообщение
-                </Link>
-              </motion.div>
-            )}
+            <div className="mt-6 flex gap-3">
+              {!isOwnProfile && (
+                <>
+                  <Link
+                    href={`/chats?userId=${user.id}`}
+                    className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Написать сообщение
+                  </Link>
+                  {currentUser && user.survey && currentUser.survey && (
+                    <motion.button
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowComparison(true)}
+                      className="px-6 py-3 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      Сравнить
+                    </motion.button>
+                  )}
+                </>
+              )}
+            </div>
           </motion.div>
 
           {/* Housing Info */}
@@ -274,121 +313,73 @@ export default function UserProfilePage() {
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {user.survey.sleepSchedule && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
                     <p className="text-sm text-foreground/60">Режим сна</p>
                     <p className="text-foreground">{formatEnum(user.survey.sleepSchedule)}</p>
                   </motion.div>
                 )}
                 {user.survey.smoking && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.15 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
                     <p className="text-sm text-foreground/60">Курение</p>
                     <p className="text-foreground">{formatEnum(user.survey.smoking)}</p>
                   </motion.div>
                 )}
                 {user.survey.alcohol && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
                     <p className="text-sm text-foreground/60">Алкоголь</p>
                     <p className="text-foreground">{formatEnum(user.survey.alcohol)}</p>
                   </motion.div>
                 )}
                 {user.survey.cleanliness && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.25 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
                     <p className="text-sm text-foreground/60">Чистоплотность</p>
                     <p className="text-foreground">{formatEnum(user.survey.cleanliness)}</p>
                   </motion.div>
                 )}
                 {user.survey.noiseLevel && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                     <p className="text-sm text-foreground/60">Уровень шума</p>
                     <p className="text-foreground">{formatEnum(user.survey.noiseLevel)}</p>
                   </motion.div>
                 )}
                 {user.survey.guests && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.35 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
                     <p className="text-sm text-foreground/60">Гости</p>
                     <p className="text-foreground">{formatEnum(user.survey.guests)}</p>
                   </motion.div>
                 )}
                 {user.survey.parties && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                     <p className="text-sm text-foreground/60">Вечеринки</p>
                     <p className="text-foreground">{formatEnum(user.survey.parties)}</p>
                   </motion.div>
                 )}
                 {user.survey.pets && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.45 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}>
                     <p className="text-sm text-foreground/60">Питомцы</p>
                     <p className="text-foreground">{formatEnum(user.survey.pets)}</p>
                   </motion.div>
                 )}
                 {user.survey.workFromHome && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
                     <p className="text-sm text-foreground/60">Работа из дома</p>
                     <p className="text-foreground">{formatEnum(user.survey.workFromHome)}</p>
                   </motion.div>
                 )}
                 {user.survey.cooking && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.55 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
                     <p className="text-sm text-foreground/60">Готовка</p>
                     <p className="text-foreground">{formatEnum(user.survey.cooking)}</p>
                   </motion.div>
                 )}
                 {user.survey.sharedSpaces && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
                     <p className="text-sm text-foreground/60">Общие пространства</p>
                     <p className="text-foreground">{formatEnum(user.survey.sharedSpaces)}</p>
                   </motion.div>
                 )}
                 {user.survey.wakeTime && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.65 }}
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}>
                     <p className="text-sm text-foreground/60">Время подъёма</p>
                     <p className="text-foreground">{formatEnum(user.survey.wakeTime)}</p>
                   </motion.div>
@@ -398,6 +389,49 @@ export default function UserProfilePage() {
           )}
         </motion.div>
       </main>
+
+      {/* Comparison Modal */}
+      <AnimatePresence>
+        {showComparison && currentUser && user.survey && currentUser.survey && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => setShowComparison(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-card rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-card border-b p-6 flex items-center justify-between z-10">
+                <h2 className="text-2xl font-display font-semibold text-foreground">
+                  Сравнение профилей
+                </h2>
+                <button
+                  onClick={() => setShowComparison(false)}
+                  className="p-2 hover:bg-secondary rounded-full transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6">
+                <ProfileComparison
+                  user1Survey={currentUser.survey}
+                  user2Survey={user.survey}
+                  user1Name={currentUser.name}
+                  user2Name={user.name}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
