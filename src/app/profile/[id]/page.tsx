@@ -193,6 +193,11 @@ export default function UserProfilePage() {
             <Link href="/chats" className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors">
               Сообщения
             </Link>
+            {isOwnProfile && (
+              <Link href="/profile/edit" className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors">
+                Редактировать
+              </Link>
+            )}
           </nav>
         </div>
       </motion.header>

@@ -48,9 +48,11 @@ model Profile {
   bio         String?
   gender      String?
   age         Int?
+  status      String?  @default("looking") // looking, found, not_looking
 
   @@index([userId])
   @@index([city])
+  @@index([status])
 }
 
 model Survey {
