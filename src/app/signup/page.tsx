@@ -187,21 +187,14 @@ export default function SignUpPage() {
   }
 
   async function handleGosuslugiSignIn() {
-    // Проверяем, настроены ли реальные переменные Госуслуг
-    const gosuslugiEnabled = process.env.NEXT_PUBLIC_GOSUSLUGI_ENABLED === 'true'
+    // Редирект на портал Госуслуг (ЕСИА) для входа
+    // После входа Госуслуги вернут пользователя на callbackUrl
+    const redirectUri = encodeURIComponent(`${window.location.origin}/search`)
+    const scope = encodeURIComponent('fullname snils email')
 
-    if (gosuslugiEnabled) {
-      // Реальный OAuth2 flow с ЕСИА — редирект на портал Госуслуг
-      const clientId = process.env.NEXT_PUBLIC_GOSUSLUGI_CLIENT_ID
-      const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/gosuslugi`)
-      const scope = encodeURIComponent('fullname snils email')
-      const state = 'roomy-auth-state'
-
-      window.location.href = `https://esia.gosuslugi.ru/idp/rso.js?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_type=code`
-    } else {
-      // Mock-режим для демонстрации — редирект на наш API endpoint
-      window.location.href = '/api/auth/gosuslugi?callbackUrl=' + encodeURIComponent('/onboarding')
-    }
+    // Для демонстрации используем тестовый стенд ЕСИА
+    // В production: https://esia.gosuslugi.ru
+    window.location.href = `https://esia.gosuslugi.ru/idp/rso.js?redirect_uri=${redirectUri}&scope=${scope}&response_type=code`
   }
 
   return (
