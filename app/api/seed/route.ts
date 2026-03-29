@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-// Russian names for display
 const firstNames = [
   'Александр', 'Михаил', 'Дмитрий', 'Алексей', 'Иван',
   'Андрей', 'Сергей', 'Артем', 'Павел', 'Максим',
@@ -13,21 +12,18 @@ const firstNames = [
   'Анастасия', 'Виктория', 'Дарья', 'Полина', 'Ксения'
 ]
 
-// Male last names
 const lastNamesMale = [
   'Иванов', 'Смирнов', 'Кузнецов', 'Попов', 'Васильев',
   'Петров', 'Соколов', 'Михайлов', 'Новиков', 'Фёдоров',
   'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Семёнов',
 ]
 
-// Female last names (with -a ending)
 const lastNamesFemale = [
   'Иванова', 'Смирнова', 'Кузнецова', 'Попова', 'Васильева',
   'Петрова', 'Соколова', 'Михайлова', 'Новикова', 'Фёдорова',
   'Морозова', 'Волкова', 'Алексеева', 'Лебедева', 'Семёнова',
 ]
 
-// Latin transliteration for emails
 const firstNamesLatin = [
   'aleksandr', 'mikhail', 'dmitry', 'aleksey', 'ivan',
   'andrey', 'sergey', 'artem', 'pavel', 'maksim',
@@ -91,9 +87,6 @@ function pickRandom<T>(arr: readonly T[]): T {
 
 export async function POST() {
   try {
-    console.log('Seeding database...')
-
-    // Clean existing data
     await prisma.message.deleteMany()
     await prisma.chat.deleteMany()
     await prisma.match.deleteMany()
@@ -107,14 +100,11 @@ export async function POST() {
       const firstName = firstNames[i]
       const firstNameLatin = firstNamesLatin[i]
       const lastNameLatin = lastNamesLatin[i % lastNamesLatin.length]
-
-      // Use female last names for female users (indices 10-24)
       const isFemale = i >= 10
       const lastName = isFemale
         ? lastNamesFemale[i % lastNamesFemale.length]
         : lastNamesMale[i % lastNamesMale.length]
 
-      // Email on latin characters
       const email = `${firstNameLatin}.${lastNameLatin}@example.com`
       const password = await bcrypt.hash('password123', 10)
 
@@ -152,26 +142,17 @@ export async function POST() {
             },
           },
         },
-        include: {
-          profile: true,
-          survey: true,
-        },
       })
 
       users.push(user)
-      console.log(`Created user: ${user.name} (${user.email})`)
     }
-
-    console.log(`\nSeeded ${users.length} users successfully!`)
 
     return NextResponse.json({
       success: true,
       count: users.length,
-      message: `Seeded ${users.length} users successfully! All users have password: password123`,
-      firstUser: users[0].email,
+      message: `Seeded ${users.length} users successfully!`,
     })
   } catch (error) {
-    console.error('Seed error:', error)
     return NextResponse.json(
       { error: 'Failed to seed database', details: String(error) },
       { status: 500 }
