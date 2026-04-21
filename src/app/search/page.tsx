@@ -69,7 +69,7 @@ const itemVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring' as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      type: 'spring' as any,
       stiffness: 100,
       damping: 20,
       mass: 1,
@@ -86,7 +86,6 @@ function SearchContent() {
   const [loading, setLoading] = useState(true)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  // Фильтры из URL
   const cityFilter = searchParams.get('city') || ''
   const minScoreFilter = parseInt(searchParams.get('minScore') || '0')
   const budgetMinFilter = parseInt(searchParams.get('budgetMin') || '0')
@@ -165,17 +164,14 @@ function SearchContent() {
   }
 
   const filteredMatches = matches.filter((match) => {
-    // Фильтр по городу
     if (localFilters.city && match.user.profile?.city !== localFilters.city) {
       return false
     }
 
-    // Фильтр по минимальной совместимости
     if (match.score < localFilters.minScore) {
       return false
     }
 
-    // Фильтр по бюджету (пересечение диапазонов)
     const userBudgetMin = match.user.profile?.budgetMin || 0
     const userBudgetMax = match.user.profile?.budgetMax || 100000
 
@@ -187,7 +183,6 @@ function SearchContent() {
       return false
     }
 
-    // Фильтр hide dealbreakers
     if (localFilters.hideDealbreakers && match.dealbreakerConflict) {
       return false
     }
@@ -202,13 +197,27 @@ function SearchContent() {
     localFilters.budgetMax < 100000 ||
     localFilters.hideDealbreakers
 
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600'
+    if (score >= 60) return 'text-emerald-600'
+    if (score >= 40) return 'text-yellow-600'
+    return 'text-orange-600'
+  }
+
+  const getScoreGradient = (score: number) => {
+    if (score >= 80) return 'from-green-500 to-emerald-500'
+    if (score >= 60) return 'from-emerald-500 to-teal-500'
+    if (score >= 40) return 'from-yellow-500 to-orange-500'
+    return 'from-orange-500 to-red-500'
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card border-b shadow-sm sticky top-0 z-10"
+          className="glass bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-10"
         >
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <div className="h-8 w-20 bg-secondary rounded" />
@@ -231,34 +240,46 @@ function SearchContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+      {/* Floating Orbs Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{ x: [0, 100, 0], y: [0, -50, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-400/15 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ x: [0, -80, 0], y: [0, 80, 0], scale: [1, 1.3, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-400/15 rounded-full blur-3xl"
+        />
+      </div>
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="bg-card border-b shadow-sm sticky top-0 z-10"
+        className="glass bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-10"
       >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-display font-semibold text-primary">
+          <Link href="/" className="text-2xl font-display font-semibold gradient-text">
             Roomy
           </Link>
-          {/* Desktop Nav */}
           <nav className="hidden lg:flex gap-4">
             <Link
               href="/profile"
-              className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors"
+              className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
             >
               Профиль
             </Link>
             <Link
               href="/chats"
-              className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors"
+              className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
             >
               Сообщения
             </Link>
           </nav>
-          {/* Mobile Menu */}
           <MobileMenu
             links={[
               { href: '/profile', label: 'Профиль' },
@@ -279,37 +300,30 @@ function SearchContent() {
       />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
         >
           <div>
-            <h1 className="text-3xl font-display font-semibold text-foreground">
-              Ваши совпадения ({filteredMatches.length})
+            <h1 className="text-3xl md:text-4xl font-display font-semibold text-foreground">
+              Ваши совпадения
             </h1>
-            {hasActiveFilters && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-foreground/60 mt-1"
-              >
-                Применены фильтры
-              </motion.p>
-            )}
+            <p className="text-foreground/60 mt-1">
+              Найдено {filteredMatches.length} {filteredMatches.length === 1 ? 'совпадение' : filteredMatches.length < 5 ? 'совпадения' : 'совпадений'}
+            </p>
           </div>
           <div className="flex gap-2">
-            {/* Desktop Filter Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className={`hidden lg:flex px-4 py-2 rounded-lg transition-all items-center gap-2 ${
+              className={`hidden lg:flex px-4 py-2 rounded-xl transition-all items-center gap-2 ${
                 filtersOpen || hasActiveFilters
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-card text-foreground hover:bg-secondary'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
+                  : 'glass text-foreground hover:bg-white/50 border border-white/20'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,14 +331,13 @@ function SearchContent() {
               </svg>
               Фильтры
             </motion.button>
-            {/* Mobile Filter Button - opens drawer */}
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setFiltersOpen(true)}
-              className={`lg:hidden px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+              className={`lg:hidden px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
                 hasActiveFilters
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-card text-foreground hover:bg-secondary'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                  : 'glass text-foreground hover:bg-white/50 border border-white/20'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -334,17 +347,16 @@ function SearchContent() {
           </div>
         </motion.div>
 
-        {/* Filters Panel - Desktop Only */}
+        {/* Filters Panel - Desktop */}
         <AnimatePresence>
           {filtersOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="hidden lg:block bg-card rounded-2xl shadow-md p-6 mb-6 overflow-hidden"
+              className="hidden lg:block glass rounded-2xl shadow-lg p-6 mb-8 overflow-hidden border border-white/20"
             >
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* City Filter */}
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Город
@@ -352,7 +364,7 @@ function SearchContent() {
                   <select
                     value={localFilters.city}
                     onChange={(e) => setLocalFilters({ ...localFilters, city: e.target.value })}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    className="w-full px-4 py-2 border border-border rounded-xl bg-background/50 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                   >
                     <option value="">Все города</option>
                     {CITIES.map((city) => (
@@ -361,7 +373,6 @@ function SearchContent() {
                   </select>
                 </div>
 
-                {/* Min Score Filter */}
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Мин. совместимость: {localFilters.minScore}%
@@ -382,7 +393,6 @@ function SearchContent() {
                   </div>
                 </div>
 
-                {/* Budget Range */}
                 <div className="lg:col-span-2">
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Бюджет: {localFilters.budgetMin.toLocaleString()}₽ - {localFilters.budgetMax.toLocaleString()}₽
@@ -421,16 +431,15 @@ function SearchContent() {
                   </div>
                 </div>
 
-                {/* Hide Dealbreakers Toggle */}
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setLocalFilters({ ...localFilters, hideDealbreakers: !localFilters.hideDealbreakers })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      localFilters.hideDealbreakers ? 'bg-primary' : 'bg-secondary'
+                      localFilters.hideDealbreakers ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-secondary'
                     }`}
                   >
                     <div
-                      className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
+                      className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-all ${
                         localFilters.hideDealbreakers ? 'translate-x-6' : 'translate-x-0.5'
                       }`}
                     />
@@ -441,13 +450,12 @@ function SearchContent() {
                 </div>
               </div>
 
-              {/* Filter Actions */}
               <div className="flex gap-2 mt-6 pt-4 border-t border-border">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={applyFilters}
-                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all"
                 >
                   Применить
                 </motion.button>
@@ -455,7 +463,7 @@ function SearchContent() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={resetFilters}
-                  className="px-6 py-2 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+                  className="px-6 py-2 glass text-foreground rounded-xl hover:bg-white/50 transition-all border border-border"
                 >
                   Сбросить
                 </motion.button>
@@ -472,7 +480,7 @@ function SearchContent() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="text-center py-12 bg-card rounded-2xl shadow-md"
+              className="text-center py-16 glass rounded-3xl border border-white/20"
             >
               <motion.div
                 initial={{ scale: 0.8 }}
@@ -484,15 +492,15 @@ function SearchContent() {
               <h3 className="text-xl font-display font-semibold text-foreground mb-2">
                 Совпадений не найдено
               </h3>
-              <p className="text-foreground/60 mb-4">
-                Попробуйте изменить параметры фильтров
+              <p className="text-foreground/60 mb-6">
+                {hasActiveFilters ? 'Попробуйте изменить параметры фильтров' : 'Заполните анкету чтобы найти совпадения'}
               </p>
               {hasActiveFilters && (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={resetFilters}
-                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all"
                 >
                   Сбросить фильтры
                 </motion.button>
@@ -509,11 +517,14 @@ function SearchContent() {
                 <motion.div
                   key={match.user.id}
                   variants={itemVariants}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="bg-card rounded-2xl shadow-md overflow-hidden"
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  className="glass rounded-3xl shadow-lg overflow-hidden border border-white/20 card-hover group"
                 >
+                  {/* Card Header with Gradient */}
+                  <div className={`h-2 bg-gradient-to-r ${getScoreGradient(match.dealbreakerConflict ? 0 : match.score)}`} />
+
                   <div className="p-6">
-                    <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-start gap-4 mb-4">
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: 'spring', stiffness: 300 }}
@@ -522,22 +533,26 @@ function SearchContent() {
                         <img
                           src={match.user.avatarUrl || '/default-avatar.png'}
                           alt={match.user.name}
-                          className="w-16 h-16 rounded-full object-cover"
+                          className="w-16 h-16 rounded-full object-cover ring-2 ring-white/50 shadow-md"
                         />
                       </motion.div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                           {match.user.name}
                         </h3>
                         <p className="text-sm text-foreground/60">
                           {match.user.profile?.city || 'Город не указан'}
-                          {match.user.profile?.age && `, ${match.user.profile.age}`}
-                          {match.user.profile?.gender && ` • ${match.user.profile.gender === 'Male' ? 'Муж.' : 'Жен.'}`}
+                        </p>
+                        <p className="text-xs text-foreground/50 mt-1">
+                          {match.user.profile?.age && `${match.user.profile.age} лет`}
+                          {match.user.profile?.age && match.user.profile?.gender && ' • '}
+                          {match.user.profile?.gender && (match.user.profile.gender === 'Male' ? 'Муж.' : 'Жен.')}
                         </p>
                       </div>
                     </div>
 
-                    <motion.div className="mb-4" layout>
+                    {/* Compatibility Score */}
+                    <motion.div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-secondary/50 to-secondary/30" layout>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-foreground/70">
                           Совместимость
@@ -549,14 +564,10 @@ function SearchContent() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
-                            className={`text-lg font-bold ${
+                            className={`text-xl font-bold ${
                               match.dealbreakerConflict
                                 ? 'text-destructive'
-                                : match.score >= 70
-                                ? 'text-green-600'
-                                : match.score >= 40
-                                ? 'text-yellow-600'
-                                : 'text-destructive'
+                                : getScoreColor(match.score)
                             }`}
                           >
                             {match.dealbreakerConflict ? 'Конфликт' : `${match.score}%`}
@@ -574,14 +585,10 @@ function SearchContent() {
                             delay: 0.2,
                             ease: [0.25, 0.46, 0.45, 0.94],
                           }}
-                          className={`h-3 rounded-full ${
+                          className={`h-3 rounded-full bg-gradient-to-r ${
                             match.dealbreakerConflict
-                              ? 'bg-destructive'
-                              : match.score >= 70
-                              ? 'bg-green-600'
-                              : match.score >= 40
-                              ? 'bg-yellow-600'
-                              : 'bg-destructive'
+                              ? 'from-destructive to-red-600'
+                              : getScoreGradient(match.score)
                           }`}
                         />
                       </div>
@@ -590,9 +597,9 @@ function SearchContent() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           transition={{ delay: 0.3 }}
-                          className="text-xs text-destructive mt-2"
+                          className="text-xs text-destructive mt-2 flex items-center gap-1"
                         >
-                          ⚠️ {match.dealbreakerReason}
+                          <span>⚠️</span> {match.dealbreakerReason}
                         </motion.p>
                       )}
                     </motion.div>
@@ -602,9 +609,9 @@ function SearchContent() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="text-sm text-foreground/60 mb-4 line-clamp-2"
+                        className="text-sm text-foreground/60 mb-4 line-clamp-2 italic"
                       >
-                        {match.user.profile.bio}
+                        "{match.user.profile.bio}"
                       </motion.p>
                     )}
 
@@ -616,13 +623,13 @@ function SearchContent() {
                     >
                       <Link
                         href={`/profile/${match.user.id}`}
-                        className="flex-1 px-4 py-2 bg-secondary text-foreground rounded-lg text-center hover:bg-secondary/80 text-sm transition-colors"
+                        className="flex-1 px-4 py-2.5 glass text-foreground rounded-xl text-center hover:bg-white/50 text-sm font-medium transition-all border border-border"
                       >
                         Профиль
                       </Link>
                       <Link
                         href={`/chats?userId=${match.user.id}`}
-                        className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-center hover:bg-primary/90 text-sm transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-center hover:shadow-lg hover:shadow-blue-500/30 text-sm font-medium transition-all"
                       >
                         Написать
                       </Link>
@@ -641,8 +648,12 @@ function SearchContent() {
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
+        />
       </div>
     }>
       <SearchContent />

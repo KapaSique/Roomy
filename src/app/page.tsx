@@ -7,25 +7,62 @@ import { motion } from 'framer-motion'
 
 export default function Home() {
   return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80')`,
-        }}
-      />
-      <div className="fixed inset-0 bg-gradient-to-br from-background via-background/90 to-background/80" />
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900" />
+
+      {/* Floating Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, -80, 0],
+            y: [0, 80, 0],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, 60, 0],
+            y: [0, 40, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-1/2 right-1/3 w-64 h-64 bg-pink-400/15 rounded-full blur-3xl"
+        />
+      </div>
 
       {/* Header */}
-      <header className="relative border-b bg-background/50 backdrop-blur-sm">
+      <header className="relative glass sticky top-0 z-50 border-b border-white/20">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Link href="/" className="text-3xl font-display font-semibold text-foreground tracking-tight">
+            <Link href="/" className="text-3xl font-display font-semibold gradient-text tracking-tight">
               Roomy
             </Link>
           </motion.div>
@@ -38,7 +75,7 @@ export default function Home() {
             >
               <Link
                 href="/signin"
-                className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors"
+                className="px-4 py-2 text-foreground/70 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
               >
                 Войти
               </Link>
@@ -50,7 +87,7 @@ export default function Home() {
             >
               <Link
                 href="/signup"
-                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5"
               >
                 Регистрация
               </Link>
@@ -62,86 +99,136 @@ export default function Home() {
       {/* Main Content */}
       <main className="relative container mx-auto px-4">
         {/* Hero Section */}
-        <section className="py-24 text-center">
+        <section className="py-32 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl md:text-7xl font-display font-semibold text-foreground mb-6 leading-tight">
-              Найдите идеального<br />
-              <span className="text-primary">соседа</span>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="inline-block mb-4 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20"
+            >
+              <span className="text-sm font-medium text-foreground/80">
+                ✨ Умный подбор соседей
+              </span>
+            </motion.div>
+
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-semibold text-foreground mb-6 leading-tight">
+              Найдите своего<br />
+              <span className="gradient-text">идеального соседа</span>
             </h1>
-            <p className="text-lg md:text-xl text-foreground/70 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Умный алгоритм подбора соседей по совместимости привычек и образа жизни.
-              Начните жить комфортно уже сегодня.
+
+            <p className="text-lg md:text-xl text-foreground/60 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Алгоритм на основе 12 параметров совместимости подберёт соседа,
+              с которым вам будет комфортно жить
             </p>
+
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
                 href="/signup"
-                className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl"
+                className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-medium hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 flex items-center gap-2"
               >
                 Начать бесплатно
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
               </Link>
               <Link
                 href="/signin"
-                className="px-8 py-4 bg-card text-foreground rounded-lg font-medium hover:bg-accent hover:text-accent-foreground transition-all border border-border"
+                className="px-8 py-4 glass text-foreground rounded-full font-medium hover:bg-white/50 transition-all border border-border/50"
               >
                 Войти
               </Link>
             </div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="grid grid-cols-3 gap-8 max-w-2xl mx-auto mt-20"
+            >
+              {[
+                { value: '1000+', label: 'Пользователей' },
+                { value: '85%', label: 'Совпадений' },
+                { value: '15 мин', label: 'На подбор' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.8 + i * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="text-3xl md:text-4xl font-display font-semibold gradient-text mb-1">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-foreground/50">{stat.label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
           </motion.div>
         </section>
 
         {/* Features Section */}
-        <section className="py-20">
+        <section className="py-24">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-4xl font-display font-semibold text-center text-foreground mb-14">
+            <h2 className="text-3xl md:text-4xl font-display font-semibold text-center text-foreground mb-4">
               Как это работает
             </h2>
+            <p className="text-foreground/60 text-center mb-16 max-w-xl mx-auto">
+              Простой процесс из трёх шагов приведёт вас к идеальному соседу
+            </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 icon: '📝',
+                gradient: 'from-blue-500 to-cyan-500',
                 title: 'Заполните анкету',
                 description: 'Расскажите о своих привычках, предпочтениях и образе жизни. Чем больше деталей, тем точнее подбор.',
-                delay: 0.1,
               },
               {
                 icon: '🔍',
+                gradient: 'from-purple-500 to-pink-500',
                 title: 'Найдите совпадения',
                 description: 'Алгоритм рассчитает совместимость и покажет наиболее подходящих соседей первыми.',
-                delay: 0.2,
               },
               {
                 icon: '💬',
+                gradient: 'from-orange-500 to-red-500',
                 title: 'Начните общение',
                 description: 'Свяжитесь с потенциальным соседом и узнайте, подходите ли вы друг другу.',
-                delay: 0.3,
               },
-            ].map((feature) => (
+            ].map((feature, index) => (
               <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: feature.delay }}
-                className="bg-card p-8 rounded-2xl shadow-md hover:shadow-lg transition-shadow"
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                className="glass p-8 rounded-3xl soft-shadow border border-white/20 card-hover group"
               >
-                <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                  <span className="text-2xl">{feature.icon}</span>
-                </div>
+                <motion.div
+                  className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                  whileHover={{ rotate: 5 }}
+                >
+                  <span className="text-3xl">{feature.icon}</span>
+                </motion.div>
                 <h3 className="text-xl font-display font-semibold text-foreground mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-foreground/70 leading-relaxed">
+                <p className="text-foreground/60 leading-relaxed">
                   {feature.description}
                 </p>
               </motion.div>
@@ -150,24 +237,44 @@ export default function Home() {
         </section>
 
         {/* Advantages Section */}
-        <section className="py-20">
+        <section className="py-24">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-display font-semibold text-center text-foreground mb-14">
+            <h2 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-4">
               Почему выбирают Roomy
             </h2>
+            <p className="text-foreground/60 max-w-xl mx-auto">
+              Наш подход к подбору соседей основан на научном анализе совместимости
+            </p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {[
-              { title: 'Умный подбор', description: 'Взвешенный алгоритм совместимости с определением критических несовместимостей' },
-              { title: 'Конфиденциальность', description: 'Ваши данные защищены и видны только подобранным соседям' },
-              { title: 'Чат в реальном времени', description: 'Общайтесь напрямую с потенциальными соседями' },
-              { title: 'Бесплатно', description: 'Все основные функции полностью бесплатны' },
+              {
+                icon: '🧠',
+                title: 'Умный подбор',
+                description: 'Взвешенный алгоритм совместимости с определением критических несовместимостей'
+              },
+              {
+                icon: '🔒',
+                title: 'Конфиденциальность',
+                description: 'Ваши данные защищены и видны только подобранным соседям'
+              },
+              {
+                icon: '⚡',
+                title: 'Чат в реальном времени',
+                description: 'Общайтесь напрямую с потенциальными соседями'
+              },
+              {
+                icon: '🎁',
+                title: 'Бесплатно',
+                description: 'Все основные функции полностью бесплатны'
+              },
             ].map((item, index) => (
               <motion.div
                 key={item.title}
@@ -175,25 +282,55 @@ export default function Home() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="flex gap-4 items-start"
+                whileHover={{ scale: 1.02 }}
+                className="glass p-6 rounded-2xl soft-shadow border border-white/20 flex gap-4 items-start"
               >
-                <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-primary text-sm">✓</span>
-                </div>
+                <div className="text-3xl">{item.icon}</div>
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
-                  <p className="text-foreground/70 text-sm">{item.description}</p>
+                  <p className="text-foreground/60 text-sm">{item.description}</p>
                 </div>
               </motion.div>
             ))}
           </div>
         </section>
+
+        {/* CTA Section */}
+        <section className="py-24">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-xl opacity-30" />
+            <div className="relative glass p-12 rounded-3xl text-center border border-white/20 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5" />
+              <div className="relative">
+                <h2 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-4">
+                  Готовы найти идеального соседа?
+                </h2>
+                <p className="text-foreground/60 mb-8 max-w-xl mx-auto">
+                  Присоединяйтесь к Roomy уже сегодня и начните жить комфортно
+                </p>
+                <Link
+                  href="/signup"
+                  className="inline-flex px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-medium hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1"
+                >
+                  Создать аккаунт
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="relative border-t bg-background/50 backdrop-blur-sm mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-foreground/60">
-          <p className="font-display">&copy; 2026 Roomy. Создано для хакатона.</p>
+      <footer className="relative glass border-t border-white/20 mt-24">
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-foreground/60 mb-2">&copy; 2026 Roomy</p>
+          <p className="text-xs text-foreground/40">Создано для хакатона</p>
         </div>
       </footer>
     </div>
