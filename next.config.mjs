@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Отключаем статическую генерацию
-  output: 'standalone',
-  // Отключаем минификацию для отладки
-  swcMinify: true,
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'api.dicebear.com' },
+    ],
+  },
 };
 
 export default nextConfig;
