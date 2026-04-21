@@ -10,31 +10,21 @@ export async function GET() {
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get current user's survey
     const userSurvey = await prisma.survey.findUnique({
       where: { userId: session.user.id },
     })
 
     if (!userSurvey) {
-      return NextResponse.json(
-        { error: 'Complete your profile first' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Complete your profile first' }, { status: 400 })
     }
 
-    // Get all other users with surveys
     const users = await prisma.user.findMany({
       where: {
         id: { not: session.user.id },
-        survey: {
-          isNot: null,
-        },
+        survey: { isNot: null },
       },
       include: {
         profile: true,
@@ -42,39 +32,11 @@ export async function GET() {
       },
     })
 
-    // Calculate compatibility for each user
-    const userSurveyData: SurveyData = {
-      sleepSchedule: userSurvey.sleepSchedule,
-      smoking: userSurvey.smoking,
-      alcohol: userSurvey.alcohol,
-      cleanliness: userSurvey.cleanliness,
-      noiseLevel: userSurvey.noiseLevel,
-      guests: userSurvey.guests,
-      parties: userSurvey.parties,
-      pets: userSurvey.pets,
-      workFromHome: userSurvey.workFromHome,
-      cooking: userSurvey.cooking,
-      sharedSpaces: userSurvey.sharedSpaces,
-      wakeTime: userSurvey.wakeTime,
-    }
+    const userSurveyData: SurveyData = pluckSurvey(userSurvey)
 
-    const matches = users.map(user => {
-      const surveyData: SurveyData = {
-        sleepSchedule: user.survey?.sleepSchedule,
-        smoking: user.survey?.smoking,
-        alcohol: user.survey?.alcohol,
-        cleanliness: user.survey?.cleanliness,
-        noiseLevel: user.survey?.noiseLevel,
-        guests: user.survey?.guests,
-        parties: user.survey?.parties,
-        pets: user.survey?.pets,
-        workFromHome: user.survey?.workFromHome,
-        cooking: user.survey?.cooking,
-        sharedSpaces: user.survey?.sharedSpaces,
-        wakeTime: user.survey?.wakeTime,
-      }
-
-      const compatibility = calculateCompatibility(userSurveyData, surveyData)
+    const matches = users.map((user) => {
+      const partnerSurvey: SurveyData = pluckSurvey(user.survey)
+      const compatibility = calculateCompatibility(userSurveyData, partnerSurvey)
 
       return {
         user: {
@@ -82,24 +44,57 @@ export async function GET() {
           name: user.name,
           avatarUrl: user.avatarUrl,
           profile: user.profile,
+          survey: partnerSurvey,
         },
-        ...compatibility,
+        score: compatibility.score,
+        dealbreakerConflict: compatibility.dealbreakerConflict,
+        dealbreakerReason: compatibility.dealbreakerReason,
+        breakdown: compatibility.breakdown,
       }
     })
 
-    // Sort by score (dealbreakers last)
     matches.sort((a, b) => {
       if (a.dealbreakerConflict && !b.dealbreakerConflict) return 1
       if (!a.dealbreakerConflict && b.dealbreakerConflict) return -1
       return b.score - a.score
     })
 
-    return NextResponse.json({ matches })
+    return NextResponse.json({
+      matches,
+      currentUserSurvey: userSurveyData,
+    })
   } catch (error) {
     console.error('Search error:', error)
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
+}
+
+function pluckSurvey(src: {
+  sleepSchedule?: string | null
+  smoking?: string | null
+  alcohol?: string | null
+  cleanliness?: string | null
+  noiseLevel?: string | null
+  guests?: string | null
+  parties?: string | null
+  pets?: string | null
+  workFromHome?: string | null
+  cooking?: string | null
+  sharedSpaces?: string | null
+  wakeTime?: string | null
+} | null): SurveyData {
+  return {
+    sleepSchedule: src?.sleepSchedule,
+    smoking: src?.smoking,
+    alcohol: src?.alcohol,
+    cleanliness: src?.cleanliness,
+    noiseLevel: src?.noiseLevel,
+    guests: src?.guests,
+    parties: src?.parties,
+    pets: src?.pets,
+    workFromHome: src?.workFromHome,
+    cooking: src?.cooking,
+    sharedSpaces: src?.sharedSpaces,
+    wakeTime: src?.wakeTime,
   }
 }
